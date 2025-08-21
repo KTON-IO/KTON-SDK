@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KTON SDK Demo</title>
-  <script src="../dist/kton-sdk.min.js"></script>
+  <script src="../dist/kton-sdk.min.js?v=2"></script>
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
 </head>
@@ -68,7 +68,7 @@
         document.getElementById("apy").innerText = apy;
 
         const tvl = await kton.getTvl(600000);
-        document.getElementById("tvl").innerText = tvl / 1000000000;
+        document.getElementById("tvl").innerText = tvl;
 
         const holders = await kton.getHoldersCount(600000);
         document.getElementById("holders").innerText = holders;
@@ -319,14 +319,13 @@
 
     async function getWalletBalance() {
       const balance = await kton.getBalance(10000);
-      document.getElementById("balance").innerText = balance / 1000000000;
+      document.getElementById("balance").innerText = balance;
     }
 
     async function getStakedBalance() {
       try {
         const stakedBalance = await kton.getStakedBalance(10000);
-        document.getElementById("stakedBalance").innerText =
-          stakedBalance / 1000000000;
+        document.getElementById("stakedBalance").innerText = stakedBalance;
       } catch (error) {
         console.warn("Error getting staked balance:", error);
         document.getElementById("stakedBalance").innerText = "0";
@@ -335,8 +334,7 @@
 
     async function getAvailableBalance() {
       const availableBalance = await kton.getAvailableBalance(10000);
-      document.getElementById("availableBalance").innerText =
-        availableBalance / 1000000000;
+      document.getElementById("availableBalance").innerText = availableBalance;
     }
 
     document

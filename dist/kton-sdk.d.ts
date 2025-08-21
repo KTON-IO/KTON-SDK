@@ -6,7 +6,7 @@ declare interface IWalletConnector {
         account?: WalletAccount;
     };
     sendTransaction: (details: TransactionDetails) => Promise<SendTransactionResponse>;
-    onStatusChange: (cb: (wallet: any) => void) => void;
+    onStatusChange: (cb: (wallet: unknown) => void) => void;
 }
 
 export declare class KTON extends EventTarget {
@@ -85,7 +85,11 @@ export declare class KTON extends EventTarget {
     private fetchJettonMasterInfo;
     getHoldersCount(ttl?: number): Promise<number>;
     getStakersCount(ttl?: number): Promise<number>;
-    getRates(ttl?: number): Promise<any>;
+    getRates(ttl?: number): Promise<{
+        TONUSD: number;
+        KTONTON: number;
+        KTONTONProjected: number;
+    }>;
     clearStorageData(): Promise<void>;
     clearStorageUserData(): Promise<void>;
     private getTonPrice;
