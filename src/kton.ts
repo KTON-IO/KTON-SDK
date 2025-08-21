@@ -164,7 +164,7 @@ class KTON extends EventTarget {
 
     // Listen for wallet changes
     this.connector.onStatusChange(async wallet => {
-      if (wallet?.account?.address) {
+      if (wallet && typeof wallet === "object" && "account" in wallet && wallet.account && typeof wallet.account === "object" && "address" in wallet.account && wallet.account.address) {
         try {
           await this.setupWallet(wallet);
           this.dispatchEvent(new Event("wallet_connected"));
@@ -186,15 +186,17 @@ class KTON extends EventTarget {
     this.dispatchEvent(new Event("deinitialized"));
   }
 
-  private async setupWallet(wallet: { account?: WalletAccount }): Promise<void> {
+  private async setupWallet(wallet: unknown): Promise<void> {
     try {
       log("Setting up wallet for KTON...");
 
-      if (!wallet?.account?.address) {
+      if (!wallet || typeof wallet !== "object" || !("account" in wallet) || !wallet.account || typeof wallet.account !== "object" || !("address" in wallet.account) || !wallet.account.address) {
         throw new Error("No wallet account address provided");
       }
 
-      const walletIsTestnet = wallet.account.chain === BLOCKCHAIN.CHAIN_DEV;
+      const walletWithAccount = wallet as { account: WalletAccount };
+
+      const walletIsTestnet = walletWithAccount.account.chain === BLOCKCHAIN.CHAIN_DEV;
       if (this.isTestnet !== walletIsTestnet) {
         log(`Network mismatch detected. SDK initialized for ${this.isTestnet ? "testnet" : "mainnet"}, but wallet is on ${walletIsTestnet ? "testnet" : "mainnet"}. Switching to wallet's network.`);
         this.isTestnet = walletIsTestnet;
@@ -207,7 +209,7 @@ class KTON extends EventTarget {
       KTON.jettonWalletAddress = undefined;
 
       // Set up wallet address
-      this.walletAddress = Address.parse(wallet.account.address);
+      this.walletAddress = Address.parse(walletWithAccount.account.address);
 
       // Set up jetton wallet
       try {
