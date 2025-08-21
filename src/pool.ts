@@ -68,44 +68,44 @@ export function parsePoolFullData(stack: TvmStackRecord[]) {
   }
 
   const poolJettonMinterCell = stack[index++].cell;
-  const poolJettonMinter = poolJettonMinterCell 
+  const poolJettonMinter = poolJettonMinterCell
     ? Cell.fromHex(poolJettonMinterCell).beginParse().loadAddress().toString()
     : "";
   const poolJettonSupply = BigInt(stack[index++].num ?? 0);
 
   const depositPayoutCell = stack[index++].cell;
-  const depositPayout = depositPayoutCell 
+  const depositPayout = depositPayoutCell
     ? Cell.fromHex(depositPayoutCell).beginParse().loadAddressAny()
     : null;
   const requestedForDeposit = BigInt(stack[index++].num ?? 0);
 
   const withdrawalPayoutCell = stack[index++].cell;
-  const withdrawalPayout = withdrawalPayoutCell 
+  const withdrawalPayout = withdrawalPayoutCell
     ? Cell.fromHex(withdrawalPayoutCell).beginParse().loadAddressAny()
     : null;
   const requestedForWithdrawal = BigInt(stack[index++].num ?? 0);
 
   const sudoerCell = stack[index++].cell;
-  const sudoer = sudoerCell 
+  const sudoer = sudoerCell
     ? Cell.fromHex(sudoerCell).beginParse().loadAddressAny()
     : null;
   const sudoerSetAt = Number(stack[index++].num);
 
   const governorCell = stack[index++].cell;
-  const governor = governorCell 
+  const governor = governorCell
     ? Cell.fromHex(governorCell).beginParse().loadAddress().toString()
     : "";
   const governorUpdateAfter = Number(stack[index++].num);
   const interestManagerCell = stack[index++].cell;
-  const interestManager = interestManagerCell 
+  const interestManager = interestManagerCell
     ? Cell.fromHex(interestManagerCell).beginParse().loadAddress().toString()
     : "";
   const halterCell = stack[index++].cell;
-  const halter = halterCell 
+  const halter = halterCell
     ? Cell.fromHex(halterCell).beginParse().loadAddress().toString()
     : "";
   const approverCell = stack[index++].cell;
-  const approver = approverCell 
+  const approver = approverCell
     ? Cell.fromHex(approverCell).beginParse().loadAddress().toString()
     : "";
 

@@ -275,9 +275,9 @@ export class NetworkCache {
       typeof data === "object" &&
       data !== null &&
       "__type" in data &&
-      (data as any).__type === "bigint" &&
+      (data as Record<string, unknown>).__type === "bigint" &&
       "value" in data &&
-      typeof (data as any).value === "string"
+      typeof (data as Record<string, unknown>).value === "string"
     );
   }
 
@@ -288,9 +288,9 @@ export class NetworkCache {
       typeof data === "object" &&
       data !== null &&
       "__type" in data &&
-      (data as any).__type === "Date" &&
+      (data as Record<string, unknown>).__type === "Date" &&
       "value" in data &&
-      typeof (data as any).value === "string"
+      typeof (data as Record<string, unknown>).value === "string"
     );
   }
 }
