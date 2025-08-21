@@ -12,6 +12,14 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
       },
+      globals: {
+        console: 'readonly',
+        localStorage: 'readonly',
+        window: 'readonly',
+        Event: 'readonly',
+        EventTarget: 'readonly',
+        fetch: 'readonly',
+      },
     },
     plugins: {
       '@typescript-eslint': tseslint,
