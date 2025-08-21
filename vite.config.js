@@ -1,9 +1,12 @@
-const path = require("path");
-const { defineConfig } = require("vite");
+import path from "path";
+import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import { fileURLToPath } from 'url';
 
-module.exports = defineConfig({
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
@@ -21,13 +24,9 @@ module.exports = defineConfig({
       formats: ["es", "umd"],
     },
     rollupOptions: {
-      external: ["@ton/core", "@ton/crypto", "@ton/ton"],
+      external: [],
       output: {
-        globals: {
-          "@ton/core": "TonCore",
-          "@ton/crypto": "TonCrypto", 
-          "@ton/ton": "Ton",
-        },
+        globals: {},
       },
     },
     sourcemap: true,

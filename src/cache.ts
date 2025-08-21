@@ -10,7 +10,7 @@ const originalStringify = JSON.stringify;
 // Override JSON.stringify to handle BigInt
 JSON.stringify = function (value, replacer, space) {
   // Create a custom replacer function that handles BigInt
-  const bigintReplacer = (key: any, value: any) => {
+  const bigintReplacer = (key: string, value: unknown) => {
     // If the value is a BigInt, convert it to a string
     if (typeof value === "bigint") {
       return value.toString() + "n"; // Append 'n' to indicate it's a BigInt
@@ -41,7 +41,7 @@ const originalParse = JSON.parse;
 // Override JSON.parse to handle BigInt strings
 JSON.parse = function (text, reviver) {
   // Create a BigInt reviver function
-  const bigintReviver = (key: any, value: any) => {
+  const bigintReviver = (key: string, value: unknown) => {
     // Check if the value is a string and matches a BigInt pattern
     if (typeof value === "string" && /^-?\d+n$/.test(value)) {
       // Remove the 'n' suffix and convert to BigInt

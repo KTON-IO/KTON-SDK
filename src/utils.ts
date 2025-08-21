@@ -17,7 +17,7 @@ const checkDev = () => {
   );
 };
 
-export const log = (...args: any[]) => {
+export const log = (...args: unknown[]) => {
   if (checkDev()) {
     console.log(...args);
   }

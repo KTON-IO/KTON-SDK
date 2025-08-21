@@ -89,8 +89,12 @@
     });
 
     kton.addEventListener("initialized", async () => {
-      getStakedBalance();
-      getAvailableBalance();
+      try {
+        await getStakedBalance();
+        await getAvailableBalance();
+      } catch (error) {
+        console.warn("Error getting initial balances:", error);
+      }
     });
 
     const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
@@ -319,9 +323,14 @@
     }
 
     async function getStakedBalance() {
-      const stakedBalance = await kton.getStakedBalance(10000);
-      document.getElementById("stakedBalance").innerText =
-        stakedBalance / 1000000000;
+      try {
+        const stakedBalance = await kton.getStakedBalance(10000);
+        document.getElementById("stakedBalance").innerText =
+          stakedBalance / 1000000000;
+      } catch (error) {
+        console.warn("Error getting staked balance:", error);
+        document.getElementById("stakedBalance").innerText = "0";
+      }
     }
 
     async function getAvailableBalance() {
@@ -332,9 +341,13 @@
 
     document
       .getElementById("refreshBalances")
-      .addEventListener("click", () => {
-        getWalletBalance();
-        getStakedBalance();
+      .addEventListener("click", async () => {
+        try {
+          await getWalletBalance();
+          await getStakedBalance();
+        } catch (error) {
+          console.warn("Error refreshing balances:", error);
+        }
       });
   </script>
 </body>
