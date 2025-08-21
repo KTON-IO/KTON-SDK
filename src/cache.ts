@@ -115,11 +115,7 @@ export class NetworkCache {
     }
   }
 
-  async save<T>(
-    key: string,
-    data: Promise<T> | T,
-    ttl?: number
-  ): Promise<T> {
+  async save<T>(key: string, data: Promise<T> | T, ttl?: number): Promise<T> {
     try {
       // Handle both Promise and direct value cases
       const resolvedData = data instanceof Promise ? await data : data;
@@ -272,7 +268,9 @@ export class NetworkCache {
   }
 
   // Type guards for our custom serialized types
-  private isSerializedBigInt(data: unknown): data is { __type: "bigint"; value: string } {
+  private isSerializedBigInt(
+    data: unknown
+  ): data is { __type: "bigint"; value: string } {
     return (
       typeof data === "object" &&
       data !== null &&
@@ -283,7 +281,9 @@ export class NetworkCache {
     );
   }
 
-  private isSerializedDate(data: unknown): data is { __type: "Date"; value: string } {
+  private isSerializedDate(
+    data: unknown
+  ): data is { __type: "Date"; value: string } {
     return (
       typeof data === "object" &&
       data !== null &&
