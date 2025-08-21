@@ -4,28 +4,28 @@ import { Cell } from "@ton/core";
 export function parsePoolFullData(stack: TvmStackRecord[]) {
   let index = 0;
   const new_contract_version = stack.length == 34;
-  let state = Number(stack[index++].num);
-  let halted = Boolean(stack[index++].num);
-  let totalBalance = BigInt(stack[index++].num ?? 0);
-  let interestRate = Number(stack[index++].num);
-  let optimisticDepositWithdrawals = Boolean(stack[index++].num);
-  let depositsOpen = Boolean(stack[index++].num);
+  const state = Number(stack[index++].num);
+  const halted = Boolean(stack[index++].num);
+  const totalBalance = BigInt(stack[index++].num ?? 0);
+  const interestRate = Number(stack[index++].num);
+  const optimisticDepositWithdrawals = Boolean(stack[index++].num);
+  const depositsOpen = Boolean(stack[index++].num);
   let instantWithdrawalFee = 0;
   if (new_contract_version) {
     instantWithdrawalFee = Number(stack[index++].num);
   }
-  let savedValidatorSetHash = BigInt(stack[index++].num ?? 0);
+  const savedValidatorSetHash = BigInt(stack[index++].num ?? 0);
 
   let prvIndex = 0;
-  let prv = stack[index++].tuple!;
-  let prvBorrowers = prv[prvIndex++].cell;
-  let prvRoundId = Number(prv[prvIndex++].num);
-  let prvActiveBorrowers = BigInt(prv[prvIndex++].num ?? 0);
-  let prvBorrowed = BigInt(prv[prvIndex++].num ?? 0);
-  let prvExpected = BigInt(prv[prvIndex++].num ?? 0);
-  let prvReturned = BigInt(prv[prvIndex++].num ?? 0);
-  let prvProfit = BigInt(prv[prvIndex++].num ?? 0);
-  let previousRound = {
+  const prv = stack[index++].tuple!;
+  const prvBorrowers = prv[prvIndex++].cell;
+  const prvRoundId = Number(prv[prvIndex++].num);
+  const prvActiveBorrowers = BigInt(prv[prvIndex++].num ?? 0);
+  const prvBorrowed = BigInt(prv[prvIndex++].num ?? 0);
+  const prvExpected = BigInt(prv[prvIndex++].num ?? 0);
+  const prvReturned = BigInt(prv[prvIndex++].num ?? 0);
+  const prvProfit = BigInt(prv[prvIndex++].num ?? 0);
+  const previousRound = {
     borrowers: prvBorrowers,
     roundId: prvRoundId,
     activeBorrowers: prvActiveBorrowers,
@@ -36,15 +36,15 @@ export function parsePoolFullData(stack: TvmStackRecord[]) {
   };
 
   let curIndex = 0;
-  let cur = stack[index++].tuple!;
-  let curBorrowers = cur[curIndex++].cell ?? Cell.EMPTY;
-  let curRoundId = Number(cur[curIndex++].num);
-  let curActiveBorrowers = BigInt(cur[curIndex++].num ?? 0);
-  let curBorrowed = BigInt(cur[curIndex++].num ?? 0);
-  let curExpected = BigInt(cur[curIndex++].num ?? 0);
-  let curReturned = BigInt(cur[curIndex++].num ?? 0);
-  let curProfit = BigInt(cur[curIndex++].num ?? 0);
-  let currentRound = {
+  const cur = stack[index++].tuple!;
+  const curBorrowers = cur[curIndex++].cell ?? Cell.EMPTY;
+  const curRoundId = Number(cur[curIndex++].num);
+  const curActiveBorrowers = BigInt(cur[curIndex++].num ?? 0);
+  const curBorrowed = BigInt(cur[curIndex++].num ?? 0);
+  const curExpected = BigInt(cur[curIndex++].num ?? 0);
+  const curReturned = BigInt(cur[curIndex++].num ?? 0);
+  const curProfit = BigInt(cur[curIndex++].num ?? 0);
+  const currentRound = {
     borrowers: curBorrowers.toString(),
     roundId: curRoundId,
     activeBorrowers: curActiveBorrowers,
@@ -54,9 +54,9 @@ export function parsePoolFullData(stack: TvmStackRecord[]) {
     profit: curProfit,
   };
 
-  let minLoan = BigInt(stack[index++].num ?? 0);
-  let maxLoan = BigInt(stack[index++].num ?? 0);
-  let governanceFee = Number(stack[index++].num);
+  const minLoan = BigInt(stack[index++].num ?? 0);
+  const maxLoan = BigInt(stack[index++].num ?? 0);
+  const governanceFee = Number(stack[index++].num);
 
   let accruedGovernanceFee = BigInt(0);
   let disbalanceTolerance = 30;
@@ -67,49 +67,49 @@ export function parsePoolFullData(stack: TvmStackRecord[]) {
     creditStartPriorElectionsEnd = Number(stack[index++].num);
   }
 
-  let poolJettonMinter = Cell.fromHex(stack[index++].cell!)
+  const poolJettonMinter = Cell.fromHex(stack[index++].cell!)
     .beginParse()
     .loadAddress()
     .toString();
-  let poolJettonSupply = BigInt(stack[index++].num ?? 0);
+  const poolJettonSupply = BigInt(stack[index++].num ?? 0);
 
-  let depositPayout = Cell.fromHex(stack[index++].cell!)
+  const depositPayout = Cell.fromHex(stack[index++].cell!)
     .beginParse()
     .loadAddressAny();
-  let requestedForDeposit = BigInt(stack[index++].num ?? 0);
+  const requestedForDeposit = BigInt(stack[index++].num ?? 0);
 
-  let withdrawalPayout = Cell.fromHex(stack[index++].cell!)
+  const withdrawalPayout = Cell.fromHex(stack[index++].cell!)
     .beginParse()
     .loadAddressAny();
-  let requestedForWithdrawal = BigInt(stack[index++].num ?? 0);
+  const requestedForWithdrawal = BigInt(stack[index++].num ?? 0);
 
-  let sudoer = Cell.fromHex(stack[index++].cell!).beginParse().loadAddressAny();
-  let sudoerSetAt = Number(stack[index++].num);
+  const sudoer = Cell.fromHex(stack[index++].cell!).beginParse().loadAddressAny();
+  const sudoerSetAt = Number(stack[index++].num);
 
-  let governor = Cell.fromHex(stack[index++].cell!)
+  const governor = Cell.fromHex(stack[index++].cell!)
     .beginParse()
     .loadAddress()
     .toString();
-  let governorUpdateAfter = Number(stack[index++].num);
-  let interestManager = Cell.fromHex(stack[index++].cell!)
+  const governorUpdateAfter = Number(stack[index++].num);
+  const interestManager = Cell.fromHex(stack[index++].cell!)
     .beginParse()
     .loadAddress()
     .toString();
-  let halter = Cell.fromHex(stack[index++].cell!)
+  const halter = Cell.fromHex(stack[index++].cell!)
     .beginParse()
     .loadAddress()
     .toString();
-  let approver = Cell.fromHex(stack[index++].cell!)
+  const approver = Cell.fromHex(stack[index++].cell!)
     .beginParse()
     .loadAddress()
     .toString();
 
-  let controllerCode = stack[index++].cell;
-  let jettonWalletCode = stack[index++].cell;
-  let payoutMinterCode = stack[index++].cell;
+  const controllerCode = stack[index++].cell;
+  const jettonWalletCode = stack[index++].cell;
+  const payoutMinterCode = stack[index++].cell;
 
-  let projectedTotalBalance = BigInt(stack[index++].num ?? 0);
-  let projectedPoolSupply = BigInt(stack[index++].num ?? 0);
+  const projectedTotalBalance = BigInt(stack[index++].num ?? 0);
+  const projectedPoolSupply = BigInt(stack[index++].num ?? 0);
 
   return {
     state,

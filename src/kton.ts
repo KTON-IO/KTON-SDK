@@ -1,4 +1,4 @@
-import { Address, beginCell, toNano, Cell, fromNano } from "@ton/core";
+import { Address, beginCell, toNano, fromNano } from "@ton/core";
 import { Api, ApyHistory, HttpClient, NftItem } from "tonapi-sdk-js";
 import { BLOCKCHAIN, CONTRACT, TIMING, API } from "./constants";
 import { NetworkCache } from "./cache";
@@ -133,11 +133,11 @@ class KTON extends EventTarget {
     log("Setting up KTON SDK, isTestnet:", this.isTestnet);
     const baseApiParams = this.tonApiKey
       ? {
-          headers: {
-            Authorization: `Bearer ${this.tonApiKey}`,
-            "Content-type": "application/json",
-          },
-        }
+        headers: {
+          Authorization: `Bearer ${this.tonApiKey}`,
+          "Content-type": "application/json",
+        },
+      }
       : {};
     const httpClient = new HttpClient({
       baseUrl: this.isTestnet ? BLOCKCHAIN.API_URL_TESTNET : BLOCKCHAIN.API_URL,
@@ -652,26 +652,26 @@ class KTON extends EventTarget {
     waitTillRoundEnd: boolean = false,
     fillOrKill: boolean = false
   ): string {
-    let cell = beginCell();
+    const cell = beginCell();
 
     switch (operation) {
-      case "stake":
-        cell.storeUint(CONTRACT.PAYLOAD_STAKE, 32);
-        cell.storeUint(1, 64).storeUint(this.partnerCode, 64);
-        break;
-      case "unstake":
-        cell.storeUint(CONTRACT.PAYLOAD_UNSTAKE, 32);
-        cell
-          .storeUint(0, 64)
-          .storeCoins(toNano(amount))
-          .storeAddress(this.walletAddress!)
-          .storeMaybeRef(
-            beginCell()
-              .storeUint(Number(waitTillRoundEnd), 1)
-              .storeUint(Number(fillOrKill), 1)
-              .endCell()
-          );
-        break;
+    case "stake":
+      cell.storeUint(CONTRACT.PAYLOAD_STAKE, 32);
+      cell.storeUint(1, 64).storeUint(this.partnerCode, 64);
+      break;
+    case "unstake":
+      cell.storeUint(CONTRACT.PAYLOAD_UNSTAKE, 32);
+      cell
+        .storeUint(0, 64)
+        .storeCoins(toNano(amount))
+        .storeAddress(this.walletAddress!)
+        .storeMaybeRef(
+          beginCell()
+            .storeUint(Number(waitTillRoundEnd), 1)
+            .storeUint(Number(fillOrKill), 1)
+            .endCell()
+        );
+      break;
     }
 
     return cell.endCell().toBoc().toString("base64");
