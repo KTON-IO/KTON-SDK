@@ -108,7 +108,7 @@ export class NetworkCache {
 
     try {
       const parsedData = JSON.parse(piece.data);
-      return this.deserializeData(parsedData);
+      return this.deserializeData(parsedData) as T;
     } catch (error) {
       console.error(`Failed to parse cached data for key ${key}:`, error);
       throw new Error("Invalid cached data");
@@ -250,11 +250,11 @@ export class NetworkCache {
     }
 
     // Handle our custom serialized types
-    if (data.__type === "bigint" && typeof data.value === "string") {
+    if (this.isSerializedBigInt(data)) {
       return BigInt(data.value);
     }
 
-    if (data.__type === "Date" && typeof data.value === "string") {
+    if (this.isSerializedDate(data)) {
       return new Date(data.value);
     }
 
@@ -269,5 +269,28 @@ export class NetworkCache {
       result[key] = this.deserializeData(value);
     }
     return result;
+  }
+
+  // Type guards for our custom serialized types
+  private isSerializedBigInt(data: unknown): data is { __type: "bigint"; value: string } {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "__type" in data &&
+      (data as any).__type === "bigint" &&
+      "value" in data &&
+      typeof (data as any).value === "string"
+    );
+  }
+
+  private isSerializedDate(data: unknown): data is { __type: "Date"; value: string } {
+    return (
+      typeof data === "object" &&
+      data !== null &&
+      "__type" in data &&
+      (data as any).__type === "Date" &&
+      "value" in data &&
+      typeof (data as any).value === "string"
+    );
   }
 }
