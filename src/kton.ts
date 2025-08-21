@@ -133,11 +133,11 @@ class KTON extends EventTarget {
     log("Setting up KTON SDK, isTestnet:", this.isTestnet);
     const baseApiParams = this.tonApiKey
       ? {
-        headers: {
-          Authorization: `Bearer ${this.tonApiKey}`,
-          "Content-type": "application/json",
-        },
-      }
+          headers: {
+            Authorization: `Bearer ${this.tonApiKey}`,
+            "Content-type": "application/json",
+          },
+        }
       : {};
     const httpClient = new HttpClient({
       baseUrl: this.isTestnet ? BLOCKCHAIN.API_URL_TESTNET : BLOCKCHAIN.API_URL,
@@ -164,7 +164,15 @@ class KTON extends EventTarget {
 
     // Listen for wallet changes
     this.connector.onStatusChange(async wallet => {
-      if (wallet && typeof wallet === "object" && "account" in wallet && wallet.account && typeof wallet.account === "object" && "address" in wallet.account && wallet.account.address) {
+      if (
+        wallet &&
+        typeof wallet === "object" &&
+        "account" in wallet &&
+        wallet.account &&
+        typeof wallet.account === "object" &&
+        "address" in wallet.account &&
+        wallet.account.address
+      ) {
         try {
           await this.setupWallet(wallet);
           this.dispatchEvent(new Event("wallet_connected"));
@@ -190,15 +198,26 @@ class KTON extends EventTarget {
     try {
       log("Setting up wallet for KTON...");
 
-      if (!wallet || typeof wallet !== "object" || !("account" in wallet) || !wallet.account || typeof wallet.account !== "object" || !("address" in wallet.account) || !wallet.account.address) {
+      if (
+        !wallet ||
+        typeof wallet !== "object" ||
+        !("account" in wallet) ||
+        !wallet.account ||
+        typeof wallet.account !== "object" ||
+        !("address" in wallet.account) ||
+        !wallet.account.address
+      ) {
         throw new Error("No wallet account address provided");
       }
 
       const walletWithAccount = wallet as { account: WalletAccount };
 
-      const walletIsTestnet = walletWithAccount.account.chain === BLOCKCHAIN.CHAIN_DEV;
+      const walletIsTestnet =
+        walletWithAccount.account.chain === BLOCKCHAIN.CHAIN_DEV;
       if (this.isTestnet !== walletIsTestnet) {
-        log(`Network mismatch detected. SDK initialized for ${this.isTestnet ? "testnet" : "mainnet"}, but wallet is on ${walletIsTestnet ? "testnet" : "mainnet"}. Switching to wallet's network.`);
+        log(
+          `Network mismatch detected. SDK initialized for ${this.isTestnet ? "testnet" : "mainnet"}, but wallet is on ${walletIsTestnet ? "testnet" : "mainnet"}. Switching to wallet's network.`
+        );
         this.isTestnet = walletIsTestnet;
         // Re-setup client with correct network after switching
         await this.setupClient();
@@ -308,7 +327,9 @@ class KTON extends EventTarget {
     }
   }
 
-  private async fetchJettonMasterInfo(jettonAddress: string): Promise<{ metadata?: { holdersCount?: number } }> {
+  private async fetchJettonMasterInfo(
+    jettonAddress: string
+  ): Promise<{ metadata?: { holdersCount?: number } }> {
     const url = `${API.TONCENTER_V3}/jetton/masters?address=${jettonAddress}`;
     const response = await fetch(url);
     if (!response.ok) {
@@ -344,8 +365,16 @@ class KTON extends EventTarget {
           const indexResponse = await fetch(indexUrl);
           if (indexResponse.ok) {
             const indexData = await indexResponse.json();
-            if (indexData && typeof indexData === "object" && "details" in indexData && indexData.details && typeof indexData.details === "object" && "holdersCount" in indexData.details) {
-              return (indexData.details as { holdersCount: number }).holdersCount;
+            if (
+              indexData &&
+              typeof indexData === "object" &&
+              "details" in indexData &&
+              indexData.details &&
+              typeof indexData.details === "object" &&
+              "holdersCount" in indexData.details
+            ) {
+              return (indexData.details as { holdersCount: number })
+                .holdersCount;
             }
           }
         }
@@ -376,7 +405,9 @@ class KTON extends EventTarget {
     return this.getHoldersCount(ttl);
   }
 
-  async getRates(ttl?: number): Promise<{ TONUSD: number; KTONTON: number; KTONTONProjected: number }> {
+  async getRates(
+    ttl?: number
+  ): Promise<{ TONUSD: number; KTONTON: number; KTONTONProjected: number }> {
     if (!this.stakingContractAddress)
       throw new Error("Staking contract address not set.");
     try {
@@ -429,7 +460,21 @@ class KTON extends EventTarget {
         ttl
       );
 
-      const tonPrice = response && typeof response === "object" && "rates" in response && response.rates && typeof response.rates === "object" && "TON" in response.rates && response.rates.TON && typeof response.rates.TON === "object" && "prices" in response.rates.TON && response.rates.TON.prices && typeof response.rates.TON.prices === "object" && "USD" in response.rates.TON.prices ? (response.rates.TON.prices as { USD: number }).USD : 0;
+      const tonPrice =
+        response &&
+        typeof response === "object" &&
+        "rates" in response &&
+        response.rates &&
+        typeof response.rates === "object" &&
+        "TON" in response.rates &&
+        response.rates.TON &&
+        typeof response.rates.TON === "object" &&
+        "prices" in response.rates.TON &&
+        response.rates.TON.prices &&
+        typeof response.rates.TON.prices === "object" &&
+        "USD" in response.rates.TON.prices
+          ? (response.rates.TON.prices as { USD: number }).USD
+          : 0;
 
       return tonPrice || 0;
     } catch {
@@ -440,7 +485,9 @@ class KTON extends EventTarget {
   async getStakedBalance(ttl?: number): Promise<number> {
     if (!KTON.jettonWalletAddress) {
       // Jetton wallet might not exist if user hasn't staked yet
-      log("Jetton wallet not available (user may not have staked yet), returning 0");
+      log(
+        "Jetton wallet not available (user may not have staked yet), returning 0"
+      );
       return 0;
     }
 
@@ -457,13 +504,23 @@ class KTON extends EventTarget {
         ttl
       );
 
-      const formattedBalance = jettonWalletData && typeof jettonWalletData === "object" && "decoded" in jettonWalletData && jettonWalletData.decoded && typeof jettonWalletData.decoded === "object" && "balance" in jettonWalletData.decoded ? (jettonWalletData.decoded as { balance: number }).balance : 0;
+      const formattedBalance =
+        jettonWalletData &&
+        typeof jettonWalletData === "object" &&
+        "decoded" in jettonWalletData &&
+        jettonWalletData.decoded &&
+        typeof jettonWalletData.decoded === "object" &&
+        "balance" in jettonWalletData.decoded
+          ? (jettonWalletData.decoded as { balance: number }).balance
+          : 0;
       log(`Current KTON balance: ${formattedBalance}`);
 
       return formattedBalance;
     } catch {
       // Handle 404 errors gracefully (user may not have any KTON tokens yet)
-      log("Jetton wallet data not found (user may not have staked yet), returning 0");
+      log(
+        "Jetton wallet data not found (user may not have staked yet), returning 0"
+      );
       return 0;
     }
   }
@@ -479,7 +536,14 @@ class KTON extends EventTarget {
         ttl
       );
 
-      return Math.max(Number(account && typeof account === "object" && "balance" in account ? (account as { balance: string | number }).balance : 0), 0);
+      return Math.max(
+        Number(
+          account && typeof account === "object" && "balance" in account
+            ? (account as { balance: string | number }).balance
+            : 0
+        ),
+        0
+      );
     } catch {
       return 0;
     }
@@ -514,7 +578,9 @@ class KTON extends EventTarget {
       ttl
     );
 
-    return account && typeof account === "object" && "balance" in account ? (account as { balance: number }).balance : 0;
+    return account && typeof account === "object" && "balance" in account
+      ? (account as { balance: number }).balance
+      : 0;
   }
 
   async getInstantLiquidity(ttl?: number): Promise<number> {
@@ -682,23 +748,23 @@ class KTON extends EventTarget {
     const cell = beginCell();
 
     switch (operation) {
-    case "stake":
-      cell.storeUint(CONTRACT.PAYLOAD_STAKE, 32);
-      cell.storeUint(1, 64).storeUint(this.partnerCode, 64);
-      break;
-    case "unstake":
-      cell.storeUint(CONTRACT.PAYLOAD_UNSTAKE, 32);
-      cell
-        .storeUint(0, 64)
-        .storeCoins(toNano(amount))
-        .storeAddress(this.walletAddress!)
-        .storeMaybeRef(
-          beginCell()
-            .storeUint(Number(waitTillRoundEnd), 1)
-            .storeUint(Number(fillOrKill), 1)
-            .endCell()
-        );
-      break;
+      case "stake":
+        cell.storeUint(CONTRACT.PAYLOAD_STAKE, 32);
+        cell.storeUint(1, 64).storeUint(this.partnerCode, 64);
+        break;
+      case "unstake":
+        cell.storeUint(CONTRACT.PAYLOAD_UNSTAKE, 32);
+        cell
+          .storeUint(0, 64)
+          .storeCoins(toNano(amount))
+          .storeAddress(this.walletAddress!)
+          .storeMaybeRef(
+            beginCell()
+              .storeUint(Number(waitTillRoundEnd), 1)
+              .storeUint(Number(fillOrKill), 1)
+              .endCell()
+          );
+        break;
     }
 
     return cell.endCell().toBoc().toString("base64");
