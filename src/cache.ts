@@ -73,7 +73,7 @@ export class NetworkCache {
     return Date.now();
   }
 
-  async get<T extends any>(
+  async get<T>(
     key: string,
     getNewValue: () => Promise<T>,
     ttl?: number
@@ -100,7 +100,7 @@ export class NetworkCache {
     return this.time - piece.ts >= piece.ttl;
   }
 
-  async retrieve<T extends any>(key: string): Promise<T> {
+  async retrieve<T>(key: string): Promise<T> {
     const piece = this.getDataPiece(key);
     if (!piece) {
       throw new Error("Data not found");
@@ -115,7 +115,7 @@ export class NetworkCache {
     }
   }
 
-  async save<T extends any>(
+  async save<T>(
     key: string,
     data: Promise<T> | T,
     ttl?: number
@@ -152,7 +152,7 @@ export class NetworkCache {
     }
   }
 
-  pop<T extends any>(key: string): T | undefined {
+  pop<T>(key: string): T | undefined {
     const fullKey = this.getFullKey(key);
     const piece = this.getDataPiece(fullKey);
     localStorage.removeItem(fullKey);
@@ -210,7 +210,7 @@ export class NetworkCache {
   }
 
   // Helper method to handle non-serializable values
-  private sanitizeForSerialization<T>(data: T): any {
+  private sanitizeForSerialization<T>(data: T): unknown {
     if (data === null || data === undefined) {
       return data;
     }
@@ -232,7 +232,7 @@ export class NetworkCache {
 
     // Handle plain objects
     if (typeof data === "object") {
-      const result: Record<string, any> = {};
+      const result: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(data)) {
         result[key] = this.sanitizeForSerialization(value);
       }
@@ -244,7 +244,7 @@ export class NetworkCache {
   }
 
   // Helper method to deserialize previously sanitized data
-  private deserializeData(data: any): any {
+  private deserializeData(data: unknown): unknown {
     if (data === null || typeof data !== "object") {
       return data;
     }
@@ -264,7 +264,7 @@ export class NetworkCache {
     }
 
     // Handle plain objects
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       result[key] = this.deserializeData(value);
     }
