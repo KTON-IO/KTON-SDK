@@ -1,0 +1,80 @@
+{
+  "name": "kton-sdk",
+  "version": "1.0.0",
+  "description": "Advanced staking SDK for TON blockchain with KTON token support",
+  "main": "dist/kton-sdk.min.js",
+  "module": "dist/kton-sdk.esm.js",
+  "types": "dist/kton-sdk.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/kton-sdk.d.ts",
+      "import": "./dist/kton-sdk.esm.js",
+      "require": "./dist/kton-sdk.min.js"
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc && vite build",
+    "dev": "vite build --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+    "test": "echo \"Tests not implemented yet\" && exit 0",
+    "docs": "python3 -m http.server 8000",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rainboltz/kton-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rainboltz/kton-sdk/issues"
+  },
+  "homepage": "https://github.com/rainboltz/kton-sdk#readme",
+  "author": {
+    "name": "KTON Team",
+    "url": "https://github.com/rainboltz"
+  },
+  "license": "MIT",
+  "keywords": [
+    "kton",
+    "ton",
+    "blockchain",
+    "staking",
+    "defi",
+    "sdk",
+    "javascript",
+    "typescript",
+    "crypto",
+    "web3"
+  ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "@ton/core": "^0.60.1",
+    "@ton/crypto": "^3.3.0",
+    "@ton/ton": "^15.2.1",
+    "tonapi-sdk-js": "^2.0.10"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.1",
+    "@typescript-eslint/eslint-plugin": "^8.40.0",
+    "@typescript-eslint/parser": "^8.40.0",
+    "eslint": "^9.33.0",
+    "prettier": "^3.6.2",
+    "terser": "^5.43.1",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.2",
+    "vite-plugin-dts": "^4.5.3",
+    "vite-plugin-node-polyfills": "^0.23.0"
+  }
+}
