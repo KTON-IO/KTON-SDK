@@ -315,12 +315,12 @@ class KTON extends EventTarget {
     try {
       const response = await this.fetchStakingPoolInfo(ttl);
 
-      const tvl =
-        response.totalBalance +
-        response.currentRound.borrowed +
-        response.previousRound.borrowed;
+      // TVL is the total value locked by users, which is the pool's total balance
+      // borrowed amounts are part of the totalBalance, not additional value
+      const tvlNano = response.totalBalance;
 
-      return Number(tvl);
+      // Convert from nanoTON to TON
+      return Number(fromNano(tvlNano));
     } catch {
       console.error("Failed to get TVL");
       throw new Error("Could not retrieve TVL.");
@@ -504,7 +504,7 @@ class KTON extends EventTarget {
         ttl
       );
 
-      const formattedBalance =
+      const balanceNano =
         jettonWalletData &&
         typeof jettonWalletData === "object" &&
         "decoded" in jettonWalletData &&
@@ -513,9 +513,12 @@ class KTON extends EventTarget {
         "balance" in jettonWalletData.decoded
           ? (jettonWalletData.decoded as { balance: number }).balance
           : 0;
-      log(`Current KTON balance: ${formattedBalance}`);
+      
+      // Convert from nanoTON to TON
+      const balanceTon = Number(fromNano(balanceNano));
+      log(`Current KTON balance: ${balanceTon} TON`);
 
-      return formattedBalance;
+      return balanceTon;
     } catch {
       // Handle 404 errors gracefully (user may not have any KTON tokens yet)
       log(
@@ -536,14 +539,13 @@ class KTON extends EventTarget {
         ttl
       );
 
-      return Math.max(
-        Number(
-          account && typeof account === "object" && "balance" in account
-            ? (account as { balance: string | number }).balance
-            : 0
-        ),
-        0
-      );
+      const balanceNano = 
+        account && typeof account === "object" && "balance" in account
+          ? (account as { balance: string | number }).balance
+          : 0;
+
+      // Convert from nanoTON to TON
+      return Math.max(Number(fromNano(balanceNano)), 0);
     } catch {
       return 0;
     }
@@ -554,9 +556,8 @@ class KTON extends EventTarget {
     if (!walletAddress) throw new Error("Wallet is not connected.");
 
     try {
-      const balance = await this.getBalance(ttl);
-      const availableBalance =
-        balance - Number(toNano(CONTRACT.RECOMMENDED_FEE_RESERVE));
+      const balance = await this.getBalance(ttl); // Already in TON
+      const availableBalance = balance - CONTRACT.RECOMMENDED_FEE_RESERVE; // 1.1 TON
 
       return Math.max(availableBalance, 0);
     } catch {
