@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KTON SDK - Vanilla JavaScript Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a8b;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            background: #e8f4f8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #ffe8e8;
+            color: #d32f2f;
+        }
+        .success {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 KTON SDK - Vanilla JavaScript Example</h1>
+    
+    <div class="container">
+        <h2>🔗 Wallet Connection</h2>
+        <button id="connect-wallet">Connect Wallet</button>
+        <button id="disconnect-wallet" disabled>Disconnect Wallet</button>
+        <div id="wallet-status" class="status">Wallet not connected</div>
+    </div>
+
+    <div class="container">
+        <h2>💰 Balances</h2>
+        <button id="refresh-balances" disabled>Refresh Balances</button>
+        <div id="balances" class="status">
+            <div>TON Balance: <span id="ton-balance">-</span></div>
+            <div>Staked Balance: <span id="staked-balance">-</span></div>
+            <div>Available Balance: <span id="available-balance">-</span></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>🔄 Staking Operations</h2>
+        <input type="number" id="stake-amount" placeholder="Amount to stake" min="0" step="0.1">
+        <button id="stake-btn" disabled>Stake TON</button>
+        <button id="stake-max-btn" disabled>Stake Max</button>
+        
+        <br><br>
+        
+        <input type="number" id="unstake-amount" placeholder="Amount to unstake" min="0" step="0.1">
+        <button id="unstake-btn" disabled>Unstake</button>
+        <button id="unstake-instant-btn" disabled>Instant Unstake</button>
+        <button id="unstake-best-btn" disabled>Best Rate Unstake</button>
+    </div>
+
+    <div class="container">
+        <h2>📊 Analytics</h2>
+        <button id="refresh-analytics" disabled>Refresh Analytics</button>
+        <div id="analytics" class="status">
+            <div>Current APY: <span id="current-apy">-</span>%</div>
+            <div>TVL: <span id="tvl">-</span> TON</div>
+            <div>Holders Count: <span id="holders-count">-</span></div>
+        </div>
+    </div>
+
+    <div id="messages"></div>
+
+    <!-- Load KTON SDK -->
+    <script src="../../dist/kton-sdk.min.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    
+    <script>
+        let kton = null;
+        let tonConnectUI = null;
+
+        // Initialize TonConnect
+        tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://raw.githubusercontent.com/rainboltz/kton-sdk/main/examples/vanilla/manifest.json'
+        });
+
+        // Initialize KTON SDK
+        function initializeKTON() {
+            kton = new window.KTONSDK.KTON({
+                connector: tonConnectUI,
+                partnerCode: 888888,
+                isTestnet: false
+            });
+
+            // Set up event listeners
+            kton.addEventListener('initialized', () => {
+                showMessage('KTON SDK initialized', 'success');
+                enableButtons();
+                refreshAll();
+            });
+
+            kton.addEventListener('deinitialized', () => {
+                showMessage('KTON SDK deinitialized', 'error');
+                disableButtons();
+            });
+
+            kton.addEventListener('wallet_connected', () => {
+                showMessage('Wallet connected', 'success');
+                document.getElementById('wallet-status').textContent = 'Wallet connected';
+                enableButtons();
+                refreshAll();
+            });
+
+            kton.addEventListener('wallet_disconnected', () => {
+                showMessage('Wallet disconnected', 'error');
+                document.getElementById('wallet-status').textContent = 'Wallet not connected';
+                disableButtons();
+            });
+        }
+
+        // UI Helper functions
+        function showMessage(message, type = 'info') {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `status ${type}`;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            
+            // Remove message after 5 seconds
+            setTimeout(() => {
+                messagesDiv.removeChild(messageDiv);
+            }, 5000);
+        }
+
+        function enableButtons() {
+            const buttons = ['refresh-balances', 'stake-btn', 'stake-max-btn', 'unstake-btn', 
+                            'unstake-instant-btn', 'unstake-best-btn', 'refresh-analytics', 'disconnect-wallet'];
+            buttons.forEach(id => {
+                document.getElementById(id).disabled = false;
+            });
+        }
+
+        function disableButtons() {
+            const buttons = ['refresh-balances', 'stake-btn', 'stake-max-btn', 'unstake-btn', 
+                            'unstake-instant-btn', 'unstake-best-btn', 'refresh-analytics', 'disconnect-wallet'];
+            buttons.forEach(id => {
+                document.getElementById(id).disabled = true;
+            });
+        }
+
+        // Refresh all data
+        async function refreshAll() {
+            if (!kton) return;
+            
+            try {
+                await refreshBalances();
+                await refreshAnalytics();
+            } catch (error) {
+                showMessage(`Error refreshing data: ${error.message}`, 'error');
+            }
+        }
+
+        // Refresh balances
+        async function refreshBalances() {
+            if (!kton) return;
+
+            try {
+                const [tonBalance, stakedBalance, availableBalance] = await Promise.all([
+                    kton.getBalance(),
+                    kton.getStakedBalance(),
+                    kton.getAvailableBalance()
+                ]);
+
+                document.getElementById('ton-balance').textContent = (tonBalance / 1e9).toFixed(4);
+                document.getElementById('staked-balance').textContent = (stakedBalance / 1e9).toFixed(4);
+                document.getElementById('available-balance').textContent = (availableBalance / 1e9).toFixed(4);
+            } catch (error) {
+                showMessage(`Error refreshing balances: ${error.message}`, 'error');
+            }
+        }
+
+        // Refresh analytics
+        async function refreshAnalytics() {
+            if (!kton) return;
+
+            try {
+                const [apy, tvl, holdersCount] = await Promise.all([
+                    kton.getCurrentApy(),
+                    kton.getTvl(),
+                    kton.getHoldersCount()
+                ]);
+
+                document.getElementById('current-apy').textContent = (apy * 100).toFixed(2);
+                document.getElementById('tvl').textContent = (tvl / 1e9).toFixed(0);
+                document.getElementById('holders-count').textContent = holdersCount.toLocaleString();
+            } catch (error) {
+                showMessage(`Error refreshing analytics: ${error.message}`, 'error');
+            }
+        }
+
+        // Event listeners
+        document.getElementById('connect-wallet').addEventListener('click', async () => {
+            try {
+                await tonConnectUI.connectWallet();
+            } catch (error) {
+                showMessage(`Error connecting wallet: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('disconnect-wallet').addEventListener('click', async () => {
+            try {
+                await tonConnectUI.disconnect();
+            } catch (error) {
+                showMessage(`Error disconnecting wallet: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('refresh-balances').addEventListener('click', refreshBalances);
+        document.getElementById('refresh-analytics').addEventListener('click', refreshAnalytics);
+
+        document.getElementById('stake-btn').addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('stake-amount').value);
+            if (!amount || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Staking in progress...');
+                await kton.stake(amount);
+                showMessage('Stake transaction sent successfully!', 'success');
+                setTimeout(refreshBalances, 2000);
+            } catch (error) {
+                showMessage(`Staking failed: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('stake-max-btn').addEventListener('click', async () => {
+            try {
+                showMessage('Staking maximum amount...');
+                await kton.stakeMax();
+                showMessage('Max stake transaction sent successfully!', 'success');
+                setTimeout(refreshBalances, 2000);
+            } catch (error) {
+                showMessage(`Max staking failed: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('unstake-btn').addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('unstake-amount').value);
+            if (!amount || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Unstaking in progress...');
+                await kton.unstake(amount);
+                showMessage('Unstake transaction sent successfully!', 'success');
+                setTimeout(refreshBalances, 2000);
+            } catch (error) {
+                showMessage(`Unstaking failed: ${error.message}`, 'error');
+            }
+        });
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeKTON();
+        });
+    </script>
+</body>
+</html>
