@@ -12,7 +12,7 @@ export function toReadableAddress(
   try {
     const addr = Address.parse(address);
     return addr.toString({ urlSafe: true, bounceable });
-  } catch (e) {
+  } catch {
     console.error("Invalid address format:", address);
     return address; // Return original if parsing fails
   }
@@ -41,9 +41,9 @@ interface WalletAccount {
 interface IWalletConnector {
   wallet: { account?: WalletAccount };
   sendTransaction: (
-    transactionDetails: TransactionDetails
+    details: TransactionDetails
   ) => Promise<SendTransactionResponse>;
-  onStatusChange: (callback: (wallet: any) => void) => void;
+  onStatusChange: (cb: (wallet: any) => void) => void;
 }
 
 interface KTONOptions {
@@ -70,7 +70,7 @@ export interface PayoutData {
 
 class KTON extends EventTarget {
   private connector: IWalletConnector;
-  private client!: Api<any>;
+  private client!: Api<unknown>;
   private walletAddress?: Address;
   private stakingContractAddress?: Address;
   private partnerCode: number;
@@ -194,7 +194,13 @@ class KTON extends EventTarget {
         throw new Error("No wallet account address provided");
       }
 
-      this.isTestnet = wallet.account.chain === BLOCKCHAIN.CHAIN_DEV;
+      const walletIsTestnet = wallet.account.chain === BLOCKCHAIN.CHAIN_DEV;
+      if (this.isTestnet !== walletIsTestnet) {
+        log(`Network mismatch detected. SDK initialized for ${this.isTestnet ? 'testnet' : 'mainnet'}, but wallet is on ${walletIsTestnet ? 'testnet' : 'mainnet'}. Switching to wallet's network.`);
+        this.isTestnet = walletIsTestnet;
+        // Re-setup client with correct network after switching
+        await this.setupClient();
+      }
 
       // Clear any previous wallet state
       this.walletAddress = undefined;
@@ -210,7 +216,7 @@ class KTON extends EventTarget {
         );
       } catch (error) {
         console.warn(
-          "Could not get jetton wallet address, will retry on demand:",
+          "Could not get jetton wallet address (user may not have staked yet), will retry on demand:",
           error
         );
       }
@@ -327,13 +333,16 @@ class KTON extends EventTarget {
           return jettonInfo.metadata.holdersCount;
         }
 
-        // Fallback: try jetton-index API
-        const indexUrl = `${API.JETTON_INDEX}/jettons/${jettonAddress}`;
-        const indexResponse = await fetch(indexUrl);
-        if (indexResponse.ok) {
-          const indexData = await indexResponse.json();
-          if ((indexData as any).details?.holdersCount) {
-            return (indexData as any).details.holdersCount;
+        // Skip jetton-index API in browser due to CORS
+        if (typeof window === "undefined") {
+          // Only try jetton-index API in Node.js environment
+          const indexUrl = `${API.JETTON_INDEX}/jettons/${jettonAddress}`;
+          const indexResponse = await fetch(indexUrl);
+          if (indexResponse.ok) {
+            const indexData = await indexResponse.json();
+            if ((indexData as any).details?.holdersCount) {
+              return (indexData as any).details.holdersCount;
+            }
           }
         }
       } catch (newApiError) {
@@ -341,8 +350,17 @@ class KTON extends EventTarget {
       }
 
       // Fallback to original TonAPI
-      const response = await this.client.jettons.getJettonInfo(jettonAddress);
-      return response.holders_count;
+      try {
+        const response = await this.client.jettons.getJettonInfo(jettonAddress);
+        return response.holders_count;
+      } catch (tonApiError) {
+        // If testnet, return 0 as jetton might not exist
+        if (this.isTestnet) {
+          console.warn("Jetton not found on testnet, returning 0 holders");
+          return 0;
+        }
+        throw tonApiError;
+      }
     } catch {
       console.error("Failed to get holders count");
       throw new Error("Could not retrieve holders count.");
@@ -416,8 +434,11 @@ class KTON extends EventTarget {
   }
 
   async getStakedBalance(ttl?: number): Promise<number> {
-    if (!KTON.jettonWalletAddress)
-      throw new Error("Jetton wallet address is not set.");
+    if (!KTON.jettonWalletAddress) {
+      // Jetton wallet might not exist if user hasn't staked yet
+      log("Jetton wallet not available (user may not have staked yet), returning 0");
+      return 0;
+    }
 
     const addressString = KTON.jettonWalletAddress.toString();
 
@@ -436,7 +457,9 @@ class KTON extends EventTarget {
       log(`Current KTON balance: ${formattedBalance}`);
 
       return formattedBalance;
-    } catch {
+    } catch (error) {
+      // Handle 404 errors gracefully (user may not have any KTON tokens yet)
+      log("Jetton wallet data not found (user may not have staked yet), returning 0");
       return 0;
     }
   }

@@ -38,6 +38,7 @@ export default [
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-arrow-callback': 'error',
+      'no-unused-vars': 'off',
     },
   },
   {

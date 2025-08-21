@@ -5,8 +5,8 @@ declare interface IWalletConnector {
     wallet: {
         account?: WalletAccount;
     };
-    sendTransaction: (transactionDetails: TransactionDetails) => Promise<SendTransactionResponse>;
-    onStatusChange: (callback: (wallet: any) => void) => void;
+    sendTransaction: (details: TransactionDetails) => Promise<SendTransactionResponse>;
+    onStatusChange: (cb: (wallet: any) => void) => void;
 }
 
 export declare class KTON extends EventTarget {
