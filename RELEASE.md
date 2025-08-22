@@ -117,6 +117,6 @@ If you need to rollback:
 
 ### Check Release Status
 
-- GitHub Actions: https://github.com/rainboltz/kton-sdk/actions
+- GitHub Actions: https://github.com/KTON-IO/KTON-SDK/actions
 - NPM Package: https://www.npmjs.com/package/kton-sdk
-- GitHub Releases: https://github.com/rainboltz/kton-sdk/releases
+- GitHub Releases: https://github.com/KTON-IO/KTON-SDK/releases

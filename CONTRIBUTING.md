@@ -13,8 +13,8 @@ We love your input! We want to make contributing to KTON SDK as easy and transpa
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/your-username/kton-sdk.git
-   cd kton-sdk
+   git clone https://github.com/your-username/KTON-SDK.git
+   cd KTON-SDK
    ```
 3. **Install dependencies**:
    ```bash
@@ -96,7 +96,7 @@ chore: update dependencies
 
 ## 🐛 Bug Reports
 
-We use GitHub Issues to track public bugs. Report a bug by [opening a new issue](https://github.com/rainboltz/kton-sdk/issues).
+We use GitHub Issues to track public bugs. Report a bug by [opening a new issue](https://github.com/KTON-IO/KTON-SDK/issues).
 
 ### Great Bug Reports Include:
 
@@ -135,7 +135,7 @@ Add any other context about the problem here.
 
 ## 💡 Feature Requests
 
-We love feature requests! Please [open an issue](https://github.com/rainboltz/kton-sdk/issues) with:
+We love feature requests! Please [open an issue](https://github.com/KTON-IO/KTON-SDK/issues) with:
 
 - Clear description of the feature
 - Why you want this feature
@@ -256,7 +256,7 @@ When adding new features:
 
 ## 🏷️ Versioning
 
-We use [Semantic Versioning](http://semver.org/). For the versions available, see the [tags on this repository](https://github.com/rainboltz/kton-sdk/tags).
+We use [Semantic Versioning](http://semver.org/). For the versions available, see the [tags on this repository](https://github.com/KTON-IO/KTON-SDK/tags).
 
 - **MAJOR** version for incompatible API changes
 - **MINOR** version for backwards-compatible functionality additions
@@ -269,12 +269,12 @@ By contributing to KTON SDK, you agree that your contributions will be licensed 
 ## ❓ Questions?
 
 Feel free to:
-- Open a [GitHub Discussion](https://github.com/rainboltz/kton-sdk/discussions)
+- Open a [GitHub Discussion](https://github.com/KTON-IO/KTON-SDK/discussions)
 - Join our [Telegram channel](https://t.me/kton_sdk)
 - Email us at dev@kton.io
 
 ## 🙏 Recognition
 
-Contributors are recognized in our [Contributors](https://github.com/rainboltz/kton-sdk/graphs/contributors) page and in release notes for significant contributions.
+Contributors are recognized in our [Contributors](https://github.com/KTON-IO/KTON-SDK/graphs/contributors) page and in release notes for significant contributions.
 
 Thank you for contributing to KTON SDK! 🎉

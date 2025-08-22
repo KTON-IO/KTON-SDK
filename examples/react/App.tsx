@@ -38,7 +38,7 @@ const App: React.FC = () => {
     const initializeSDK = async () => {
       try {
         const tonConnectInstance = new TonConnectUI({
-          manifestUrl: 'https://raw.githubusercontent.com/rainboltz/kton-sdk/main/examples/react/manifest.json'
+          manifestUrl: 'https://raw.githubusercontent.com/KTON-IO/KTON-SDK/main/examples/react/manifest.json'
         });
         
         setTonConnectUI(tonConnectInstance);
