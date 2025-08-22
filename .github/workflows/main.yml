@@ -43,7 +43,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: dist-node-${{ matrix.node-version }}
           path: dist
 
   deploy-demo:
@@ -63,7 +63,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: dist-node-20.x
           path: dist
 
       - name: Prepare demo for deployment
@@ -106,7 +106,7 @@ jobs:
       - name: Download build artifact
         uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: dist-node-20.x
           path: dist
 
       - name: Publish to NPM (dev)
