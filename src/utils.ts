@@ -1,4 +1,4 @@
-const checkDev = () => {
+export const checkDev = () => {
   if (typeof window === "undefined") {
     return false;
   }

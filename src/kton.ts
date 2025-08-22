@@ -1,5 +1,6 @@
 import { Address, beginCell, toNano, fromNano } from "@ton/core";
-import { Api, ApyHistory, HttpClient, NftItem } from "tonapi-sdk-js";
+import { Api, HttpClient } from "tonapi-sdk-js";
+import type { ApyHistory, NftItem } from "tonapi-sdk-js";
 import { BLOCKCHAIN, CONTRACT, TIMING, API } from "./constants";
 import { NetworkCache } from "./cache";
 import { log } from "./utils";
