@@ -1,6 +1,6 @@
 {
   "name": "kton-sdk",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Advanced staking SDK for TON blockchain with KTON token support",
   "type": "module",
   "main": "dist/kton-sdk.min.js",
@@ -43,15 +43,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rainboltz/kton-sdk.git"
+    "url": "git+https://github.com/KTON-IO/KTON-SDK.git"
   },
   "bugs": {
-    "url": "https://github.com/rainboltz/kton-sdk/issues"
+    "url": "https://github.com/KTON-IO/KTON-SDK/issues"
   },
-  "homepage": "https://github.com/rainboltz/kton-sdk#readme",
+  "homepage": "https://github.com/KTON-IO/KTON-SDK#readme",
   "author": {
     "name": "KTON Team",
-    "url": "https://github.com/rainboltz"
+    "url": "https://github.com/KTON-IO"
   },
   "license": "MIT",
   "keywords": [
