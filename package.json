@@ -1,6 +1,6 @@
 {
   "name": "kton-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Advanced staking SDK for TON blockchain with KTON token support",
   "type": "module",
   "main": "dist/kton-sdk.min.js",
