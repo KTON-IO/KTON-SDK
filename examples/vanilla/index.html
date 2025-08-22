@@ -288,6 +288,40 @@
             }
         });
 
+        document.getElementById('unstake-instant-btn').addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('unstake-amount').value);
+            if (!amount || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Instant unstaking in progress...');
+                await kton.unstakeInstant(amount);
+                showMessage('Instant unstake transaction sent successfully!', 'success');
+                setTimeout(refreshBalances, 2000);
+            } catch (error) {
+                showMessage(`Instant unstaking failed: ${error.message}`, 'error');
+            }
+        });
+
+        document.getElementById('unstake-best-btn').addEventListener('click', async () => {
+            const amount = parseFloat(document.getElementById('unstake-amount').value);
+            if (!amount || amount <= 0) {
+                showMessage('Please enter a valid amount', 'error');
+                return;
+            }
+
+            try {
+                showMessage('Best rate unstaking in progress...');
+                await kton.unstakeBestRate(amount);
+                showMessage('Best rate unstake transaction sent successfully!', 'success');
+                setTimeout(refreshBalances, 2000);
+            } catch (error) {
+                showMessage(`Best rate unstaking failed: ${error.message}`, 'error');
+            }
+        });
+
         // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', () => {
             initializeKTON();

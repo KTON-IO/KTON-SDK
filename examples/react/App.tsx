@@ -30,6 +30,8 @@ const App: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | 'info' }>({ text: '', type: 'info' });
+  const [stakeAmount, setStakeAmount] = useState('');
+  const [unstakeAmount, setUnstakeAmount] = useState('');
 
   // Initialize KTON SDK
   useEffect(() => {
@@ -242,13 +244,14 @@ const App: React.FC = () => {
               <div style={{ marginBottom: '10px' }}>
                 <input 
                   type="number" 
-                  placeholder="Amount to stake" 
-                  id="stakeAmount"
+                  placeholder="Amount to stake"
+                  value={stakeAmount}
+                  onChange={(e) => setStakeAmount(e.target.value)}
                   style={{ padding: '8px', marginRight: '10px' }}
                 />
                 <button 
                   onClick={() => {
-                    const amount = parseFloat((document.getElementById('stakeAmount') as HTMLInputElement).value);
+                    const amount = parseFloat(stakeAmount);
                     if (amount > 0) handleStake(amount);
                   }}
                   disabled={loading}
@@ -261,13 +264,14 @@ const App: React.FC = () => {
               <div>
                 <input 
                   type="number" 
-                  placeholder="Amount to unstake" 
-                  id="unstakeAmount"
+                  placeholder="Amount to unstake"
+                  value={unstakeAmount}
+                  onChange={(e) => setUnstakeAmount(e.target.value)}
                   style={{ padding: '8px', marginRight: '10px' }}
                 />
                 <button 
                   onClick={() => {
-                    const amount = parseFloat((document.getElementById('unstakeAmount') as HTMLInputElement).value);
+                    const amount = parseFloat(unstakeAmount);
                     if (amount > 0) handleUnstake(amount, 'standard');
                   }}
                   disabled={loading}
@@ -277,7 +281,7 @@ const App: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => {
-                    const amount = parseFloat((document.getElementById('unstakeAmount') as HTMLInputElement).value);
+                    const amount = parseFloat(unstakeAmount);
                     if (amount > 0) handleUnstake(amount, 'instant');
                   }}
                   disabled={loading}
@@ -287,7 +291,7 @@ const App: React.FC = () => {
                 </button>
                 <button 
                   onClick={() => {
-                    const amount = parseFloat((document.getElementById('unstakeAmount') as HTMLInputElement).value);
+                    const amount = parseFloat(unstakeAmount);
                     if (amount > 0) handleUnstake(amount, 'best');
                   }}
                   disabled={loading}
