@@ -71,7 +71,6 @@ jobs:
           mkdir -p gh-pages
           cp demo/index.html gh-pages/
           cp -r dist gh-pages/
-          sed -i 's|src="../dist/kton-sdk.min.js?v=2"|src="./dist/kton-sdk.min.js"|g' gh-pages/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
