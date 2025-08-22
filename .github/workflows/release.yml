@@ -73,10 +73,11 @@ jobs:
             git log --pretty=format:"- %s (%h)" >> CHANGELOG.md
           fi
           
-          # Set changelog content as output
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          # Set changelog content as output using random delimiter
+          DELIMITER=$(openssl rand -hex 16)
+          echo "changelog<<${DELIMITER}" >> $GITHUB_OUTPUT
           cat CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "${DELIMITER}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         id: create_release
