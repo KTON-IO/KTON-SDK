@@ -27,7 +27,7 @@
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\",",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
     "test": "vitest",
     "docs": "python3 -m http.server 8000",
     "prepublishOnly": "npm run build"
