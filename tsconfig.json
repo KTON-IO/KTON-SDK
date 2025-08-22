@@ -1,16 +1,40 @@
 {
-    "compilerOptions": {
-      "target": "es2020",
-      "lib": ["es2020", "dom"],
-      "module": "commonjs",
-      "declaration": true,
-      "outDir": "./dist",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true
-    },
-    "include": ["src/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts", "dist"]
-  }
+  "compilerOptions": {
+    /* Base Options */
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "target": "ES2022",
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitAny": true,
+
+    /* If NOT transpiling with TypeScript */
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+
+    /* If your code runs in the DOM */
+    "lib": ["es2022", "dom", "dom.iterable"],
+
+    /* If you're building a library */
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist"
+  },
+  "include": ["src"],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "src/**/*.test.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts"
+  ]
+}
   

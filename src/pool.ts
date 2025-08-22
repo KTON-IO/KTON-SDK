@@ -1,30 +1,44 @@
-import { TvmStackRecord } from "tonapi-sdk-js";
+import type { TvmStackRecord } from "tonapi-sdk-js";
 import { Cell } from "@ton/core";
+
+function safeGetNumber(record: TvmStackRecord | undefined): number {
+  if (record?.type !== 'num') {
+    return 0;
+  }
+  return Number(record.num);
+}
+
+function safeGetBigInt(record: TvmStackRecord | undefined): bigint {
+  if (record?.type !== 'num' || typeof record.num === 'undefined') {
+    return 0n;
+  }
+  return BigInt(record.num);
+}
 
 export function parsePoolFullData(stack: TvmStackRecord[]) {
   let index = 0;
   const new_contract_version = stack.length == 34;
-  const state = Number(stack[index++].num);
-  const halted = Boolean(stack[index++].num);
-  const totalBalance = BigInt(stack[index++].num ?? 0);
-  const interestRate = Number(stack[index++].num);
-  const optimisticDepositWithdrawals = Boolean(stack[index++].num);
-  const depositsOpen = Boolean(stack[index++].num);
+  const state = safeGetNumber(stack[index++]);
+  const halted = Boolean(safeGetNumber(stack[index++]));
+  const totalBalance = safeGetBigInt(stack[index++]);
+  const interestRate = safeGetNumber(stack[index++]);
+  const optimisticDepositWithdrawals = Boolean(safeGetNumber(stack[index++]));
+  const depositsOpen = Boolean(safeGetNumber(stack[index++]));
   let instantWithdrawalFee = 0;
   if (new_contract_version) {
-    instantWithdrawalFee = Number(stack[index++].num);
+    instantWithdrawalFee = safeGetNumber(stack[index++]);
   }
-  const savedValidatorSetHash = BigInt(stack[index++].num ?? 0);
+  const savedValidatorSetHash = safeGetBigInt(stack[index++]);
 
   let prvIndex = 0;
-  const prv = stack[index++].tuple!;
-  const prvBorrowers = prv[prvIndex++].cell;
-  const prvRoundId = Number(prv[prvIndex++].num);
-  const prvActiveBorrowers = BigInt(prv[prvIndex++].num ?? 0);
-  const prvBorrowed = BigInt(prv[prvIndex++].num ?? 0);
-  const prvExpected = BigInt(prv[prvIndex++].num ?? 0);
-  const prvReturned = BigInt(prv[prvIndex++].num ?? 0);
-  const prvProfit = BigInt(prv[prvIndex++].num ?? 0);
+  const prv = stack[index++]?.tuple ?? [];
+  const prvBorrowers = prv[prvIndex++]?.cell;
+  const prvRoundId = safeGetNumber(prv[prvIndex++]);
+  const prvActiveBorrowers = safeGetBigInt(prv[prvIndex++]);
+  const prvBorrowed = safeGetBigInt(prv[prvIndex++]);
+  const prvExpected = safeGetBigInt(prv[prvIndex++]);
+  const prvReturned = safeGetBigInt(prv[prvIndex++]);
+  const prvProfit = safeGetBigInt(prv[prvIndex++]);
   const previousRound = {
     borrowers: prvBorrowers,
     roundId: prvRoundId,
@@ -36,14 +50,14 @@ export function parsePoolFullData(stack: TvmStackRecord[]) {
   };
 
   let curIndex = 0;
-  const cur = stack[index++].tuple!;
-  const curBorrowers = cur[curIndex++].cell ?? Cell.EMPTY;
-  const curRoundId = Number(cur[curIndex++].num);
-  const curActiveBorrowers = BigInt(cur[curIndex++].num ?? 0);
-  const curBorrowed = BigInt(cur[curIndex++].num ?? 0);
-  const curExpected = BigInt(cur[curIndex++].num ?? 0);
-  const curReturned = BigInt(cur[curIndex++].num ?? 0);
-  const curProfit = BigInt(cur[curIndex++].num ?? 0);
+  const cur = stack[index++]?.tuple ?? [];
+  const curBorrowers = cur[curIndex++]?.cell ?? Cell.EMPTY;
+  const curRoundId = safeGetNumber(cur[curIndex++]);
+  const curActiveBorrowers = safeGetBigInt(cur[curIndex++]);
+  const curBorrowed = safeGetBigInt(cur[curIndex++]);
+  const curExpected = safeGetBigInt(cur[curIndex++]);
+  const curReturned = safeGetBigInt(cur[curIndex++]);
+  const curProfit = safeGetBigInt(cur[curIndex++]);
   const currentRound = {
     borrowers: curBorrowers.toString(),
     roundId: curRoundId,
@@ -54,67 +68,67 @@ export function parsePoolFullData(stack: TvmStackRecord[]) {
     profit: curProfit,
   };
 
-  const minLoan = BigInt(stack[index++].num ?? 0);
-  const maxLoan = BigInt(stack[index++].num ?? 0);
-  const governanceFee = Number(stack[index++].num);
+  const minLoan = safeGetBigInt(stack[index++]);
+  const maxLoan = safeGetBigInt(stack[index++]);
+  const governanceFee = safeGetNumber(stack[index++]);
 
-  let accruedGovernanceFee = BigInt(0);
+  let accruedGovernanceFee = 0n;
   let disbalanceTolerance = 30;
   let creditStartPriorElectionsEnd = 0;
   if (new_contract_version) {
-    accruedGovernanceFee = BigInt(stack[index++].num ?? 0);
-    disbalanceTolerance = Number(stack[index++].num);
-    creditStartPriorElectionsEnd = Number(stack[index++].num);
+    accruedGovernanceFee = safeGetBigInt(stack[index++]);
+    disbalanceTolerance = safeGetNumber(stack[index++]);
+    creditStartPriorElectionsEnd = safeGetNumber(stack[index++]);
   }
 
-  const poolJettonMinterCell = stack[index++].cell;
+  const poolJettonMinterCell = stack[index++]?.cell;
   const poolJettonMinter = poolJettonMinterCell
     ? Cell.fromHex(poolJettonMinterCell).beginParse().loadAddress().toString()
     : "";
-  const poolJettonSupply = BigInt(stack[index++].num ?? 0);
+  const poolJettonSupply = safeGetBigInt(stack[index++]);
 
-  const depositPayoutCell = stack[index++].cell;
+  const depositPayoutCell = stack[index++]?.cell;
   const depositPayout = depositPayoutCell
     ? Cell.fromHex(depositPayoutCell).beginParse().loadAddressAny()
     : null;
-  const requestedForDeposit = BigInt(stack[index++].num ?? 0);
+  const requestedForDeposit = safeGetBigInt(stack[index++]);
 
-  const withdrawalPayoutCell = stack[index++].cell;
+  const withdrawalPayoutCell = stack[index++]?.cell;
   const withdrawalPayout = withdrawalPayoutCell
     ? Cell.fromHex(withdrawalPayoutCell).beginParse().loadAddressAny()
     : null;
-  const requestedForWithdrawal = BigInt(stack[index++].num ?? 0);
+  const requestedForWithdrawal = safeGetBigInt(stack[index++]);
 
-  const sudoerCell = stack[index++].cell;
+  const sudoerCell = stack[index++]?.cell;
   const sudoer = sudoerCell
     ? Cell.fromHex(sudoerCell).beginParse().loadAddressAny()
     : null;
-  const sudoerSetAt = Number(stack[index++].num);
+  const sudoerSetAt = safeGetNumber(stack[index++]);
 
-  const governorCell = stack[index++].cell;
+  const governorCell = stack[index++]?.cell;
   const governor = governorCell
     ? Cell.fromHex(governorCell).beginParse().loadAddress().toString()
     : "";
-  const governorUpdateAfter = Number(stack[index++].num);
-  const interestManagerCell = stack[index++].cell;
+  const governorUpdateAfter = safeGetNumber(stack[index++]);
+  const interestManagerCell = stack[index++]?.cell;
   const interestManager = interestManagerCell
     ? Cell.fromHex(interestManagerCell).beginParse().loadAddress().toString()
     : "";
-  const halterCell = stack[index++].cell;
+  const halterCell = stack[index++]?.cell;
   const halter = halterCell
     ? Cell.fromHex(halterCell).beginParse().loadAddress().toString()
     : "";
-  const approverCell = stack[index++].cell;
+  const approverCell = stack[index++]?.cell;
   const approver = approverCell
     ? Cell.fromHex(approverCell).beginParse().loadAddress().toString()
     : "";
 
-  const controllerCode = stack[index++].cell;
-  const jettonWalletCode = stack[index++].cell;
-  const payoutMinterCode = stack[index++].cell;
+  const controllerCode = stack[index++]?.cell;
+  const jettonWalletCode = stack[index++]?.cell;
+  const payoutMinterCode = stack[index++]?.cell;
 
-  const projectedTotalBalance = BigInt(stack[index++].num ?? 0);
-  const projectedPoolSupply = BigInt(stack[index++].num ?? 0);
+  const projectedTotalBalance = safeGetBigInt(stack[index++]);
+  const projectedPoolSupply = safeGetBigInt(stack[index++]);
 
   return {
     state,
