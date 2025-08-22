@@ -2,14 +2,14 @@ import type { TvmStackRecord } from "tonapi-sdk-js";
 import { Cell } from "@ton/core";
 
 function safeGetNumber(record: TvmStackRecord | undefined): number {
-  if (record?.type !== 'num') {
+  if (record?.type !== "num") {
     return 0;
   }
   return Number(record.num);
 }
 
 function safeGetBigInt(record: TvmStackRecord | undefined): bigint {
-  if (record?.type !== 'num' || typeof record.num === 'undefined') {
+  if (record?.type !== "num" || typeof record.num === "undefined") {
     return 0n;
   }
   return BigInt(record.num);
