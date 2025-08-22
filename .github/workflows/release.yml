@@ -65,19 +65,16 @@ jobs:
           # Get previous tag
           PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           
+          # Generate simple changelog
           if [ -n "$PREVIOUS_TAG" ]; then
-            echo "## Changes since $PREVIOUS_TAG" > CHANGELOG.md
-            git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD >> CHANGELOG.md
+            CHANGELOG="## Changes since $PREVIOUS_TAG"$'\n'"$(git log --pretty=format:"- %s (%h)" $PREVIOUS_TAG..HEAD)"
           else
-            echo "## Initial Release" > CHANGELOG.md
-            git log --pretty=format:"- %s (%h)" >> CHANGELOG.md
+            CHANGELOG="## Initial Release"$'\n'"$(git log --pretty=format:"- %s (%h)" --max-count=10)"
           fi
           
-          # Set changelog content as output using random delimiter
-          DELIMITER=$(openssl rand -hex 16)
-          echo "changelog<<${DELIMITER}" >> $GITHUB_OUTPUT
-          cat CHANGELOG.md >> $GITHUB_OUTPUT
-          echo "${DELIMITER}" >> $GITHUB_OUTPUT
+          # Escape newlines and set as single-line output
+          CHANGELOG_ESCAPED=$(echo "$CHANGELOG" | sed ':a;N;$!ba;s/\n/\\n/g')
+          echo "changelog=$CHANGELOG_ESCAPED" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         id: create_release
