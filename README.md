@@ -15,11 +15,11 @@
   <a href="https://www.npmjs.com/package/kton-sdk">
     <img src="https://img.shields.io/npm/dt/kton-sdk?color=green&style=flat-square" alt="npm downloads">
   </a>
-  <a href="https://github.com/rainboltz/kton-sdk/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/rainboltz/kton-sdk?color=orange&style=flat-square" alt="license">
+  <a href="https://github.com/KTON-IO/KTON-SDK/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/KTON-IO/KTON-SDK?color=orange&style=flat-square" alt="license">
   </a>
-  <a href="https://github.com/rainboltz/kton-sdk/actions">
-    <img src="https://img.shields.io/github/workflow/status/rainboltz/kton-sdk/CI?style=flat-square" alt="build status">
+  <a href="https://github.com/KTON-IO/KTON-SDK/actions">
+    <img src="https://img.shields.io/github/workflow/status/KTON-IO/KTON-SDK/CI?style=flat-square" alt="build status">
   </a>
 </p>
 
@@ -203,8 +203,8 @@ Try the interactive demo to see KTON SDK in action:
 
 ```bash
 # Clone the repository
-git clone https://github.com/rainboltz/kton-sdk.git
-cd kton-sdk
+git clone https://github.com/KTON-IO/KTON-SDK.git
+cd KTON-SDK
 
 # Install dependencies
 npm install
@@ -246,8 +246,8 @@ Check out these example implementations:
 
 ```bash
 # Clone repository
-git clone https://github.com/rainboltz/kton-sdk.git
-cd kton-sdk
+git clone https://github.com/KTON-IO/KTON-SDK.git
+cd KTON-SDK
 
 # Install dependencies
 npm install
@@ -311,9 +311,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- 📚 **Documentation**: [GitHub Pages](https://rainboltz.github.io/kton-sdk)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/rainboltz/kton-sdk/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/rainboltz/kton-sdk/discussions)
+- 📚 **Documentation**: [GitHub Pages](https://KTON-IO.github.io/KTON-SDK)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/KTON-IO/KTON-SDK/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/KTON-IO/KTON-SDK/discussions)
 - 🔗 **TON Community**: [TON Developers Chat](https://t.me/tondev_eng)
 
 ## 🏗️ Built With
