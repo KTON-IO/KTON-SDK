@@ -29,8 +29,17 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
     "test": "vitest",
+    "test:run": "vitest --run",
     "docs": "python3 -m http.server 8000",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "version:patch": "npm version patch --no-git-tag-version",
+    "version:minor": "npm version minor --no-git-tag-version",
+    "version:major": "npm version major --no-git-tag-version",
+    "release:patch": "npm run version:patch && npm run release:tag",
+    "release:minor": "npm run version:minor && npm run release:tag",
+    "release:major": "npm run version:major && npm run release:tag",
+    "release:tag": "git add package.json && git commit -m \"chore: bump version to $(node -p 'require(\"./package.json\").version')\" && git tag v$(node -p 'require(\"./package.json\").version') && echo \"Tagged version v$(node -p 'require(\"./package.json\").version'). Run 'git push origin main --tags' to trigger release.\"",
+    "release:push": "git push origin main --tags"
   },
   "repository": {
     "type": "git",
