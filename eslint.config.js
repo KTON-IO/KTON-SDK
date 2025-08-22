@@ -25,7 +25,7 @@ export default [
       '@typescript-eslint': tseslint,
     },
     rules: {
-      'indent': ['error', 2],
+      'indent': 'off',
       'quotes': ['error', 'double'],
       'semi': ['error', 'always'],
       '@typescript-eslint/no-unused-vars': ['error'],
