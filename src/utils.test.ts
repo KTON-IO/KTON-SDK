@@ -45,7 +45,7 @@ describe("log", () => {
 
   it("should log messages when checkDev returns true", () => {
     vi.spyOn(global, "window", "get").mockReturnValueOnce({
-      location: { hostname: "localhost" }
+      location: { hostname: "localhost" },
     } as any);
     utils.log("Hello", "World");
     expect(console.log).toHaveBeenCalledWith("Hello", "World");
@@ -53,7 +53,7 @@ describe("log", () => {
 
   it("should not log messages when checkDev returns false", () => {
     vi.spyOn(global, "window", "get").mockReturnValueOnce({
-      location: { hostname: "production.com" }
+      location: { hostname: "production.com" },
     } as any);
     utils.log("Should not appear");
     expect(console.log).not.toHaveBeenCalled();

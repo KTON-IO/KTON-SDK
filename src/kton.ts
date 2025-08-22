@@ -134,11 +134,11 @@ class KTON extends EventTarget {
     log("Setting up KTON SDK, isTestnet:", this.isTestnet);
     const baseApiParams = this.tonApiKey
       ? {
-        headers: {
-          Authorization: `Bearer ${this.tonApiKey}`,
-          "Content-type": "application/json",
-        },
-      }
+          headers: {
+            Authorization: `Bearer ${this.tonApiKey}`,
+            "Content-type": "application/json",
+          },
+        }
       : {};
     const httpClient = new HttpClient({
       baseUrl: this.isTestnet ? BLOCKCHAIN.API_URL_TESTNET : BLOCKCHAIN.API_URL,
@@ -514,7 +514,7 @@ class KTON extends EventTarget {
         "balance" in jettonWalletData.decoded
           ? (jettonWalletData.decoded as { balance: number }).balance
           : 0;
-      
+
       // Convert from nanoTON to TON
       const balanceTon = Number(fromNano(balanceNano));
       log(`Current KTON balance: ${balanceTon} TON`);
@@ -540,7 +540,7 @@ class KTON extends EventTarget {
         ttl
       );
 
-      const balanceNano = 
+      const balanceNano =
         account && typeof account === "object" && "balance" in account
           ? (account as { balance: string | number }).balance
           : 0;
@@ -750,23 +750,23 @@ class KTON extends EventTarget {
     const cell = beginCell();
 
     switch (operation) {
-    case "stake":
-      cell.storeUint(CONTRACT.PAYLOAD_STAKE, 32);
-      cell.storeUint(1, 64).storeUint(this.partnerCode, 64);
-      break;
-    case "unstake":
-      cell.storeUint(CONTRACT.PAYLOAD_UNSTAKE, 32);
-      cell
-        .storeUint(0, 64)
-        .storeCoins(toNano(amount))
-        .storeAddress(this.walletAddress!)
-        .storeMaybeRef(
-          beginCell()
-            .storeUint(Number(waitTillRoundEnd), 1)
-            .storeUint(Number(fillOrKill), 1)
-            .endCell()
-        );
-      break;
+      case "stake":
+        cell.storeUint(CONTRACT.PAYLOAD_STAKE, 32);
+        cell.storeUint(1, 64).storeUint(this.partnerCode, 64);
+        break;
+      case "unstake":
+        cell.storeUint(CONTRACT.PAYLOAD_UNSTAKE, 32);
+        cell
+          .storeUint(0, 64)
+          .storeCoins(toNano(amount))
+          .storeAddress(this.walletAddress!)
+          .storeMaybeRef(
+            beginCell()
+              .storeUint(Number(waitTillRoundEnd), 1)
+              .storeUint(Number(fillOrKill), 1)
+              .endCell()
+          );
+        break;
     }
 
     return cell.endCell().toBoc().toString("base64");
