@@ -5,7 +5,8 @@
 </p>
 
 <p align="center">
-  <strong>Advanced Staking SDK for TON Blockchain</strong>
+  <strong>Advanced Liquid Staking SDK for TON Blockchain</strong><br>
+  <em>Supporting both KTON and pKTON protocols</em>
 </p>
 
 <p align="center">
@@ -27,23 +28,29 @@
 
 ## 📖 Overview
 
-KTON SDK is a comprehensive TypeScript/JavaScript library designed for seamless integration with the TON blockchain's staking ecosystem. Built for developers who want to incorporate advanced staking functionalities into their decentralized applications, KTON SDK provides intuitive APIs for staking operations, balance management, yield optimization, and much more.
+KTON SDK is a comprehensive TypeScript/JavaScript library for seamless integration with TON blockchain's liquid staking ecosystem. **Now supporting both KTON and pKTON protocols** with a unified API interface, making it easy to build applications that work with multiple staking protocols.
+
+### 🆕 What's New in v1.1.0
+
+- **🔄 Dual Protocol Support**: Full KTON and pKTON compatibility
+- **🔀 Dynamic Token Switching**: Switch between protocols at runtime  
+- **🔙 100% Backward Compatible**: Existing code works unchanged
+- **🎯 Unified API**: Same interface for both token types
 
 ### ✨ Key Features
 
-- 🔄 **Complete Staking Operations** - Stake, unstake, and manage liquid staking positions
-- 📊 **Real-time Analytics** - Access APY, TVL, and detailed staking metrics  
-- 💰 **Multi-Strategy Support** - Standard, instant, and best-rate unstaking options
+- 🔄 **Dual Protocol Support** - KTON and pKTON liquid staking protocols
+- 📊 **Real-time Analytics** - APY, TVL, and detailed staking metrics  
+- 💰 **Multi-Strategy Support** - Standard, instant, and best-rate unstaking
+- 🔀 **Dynamic Token Switching** - Switch between KTON/pKTON at runtime
 - 🔗 **Wallet Integration** - Seamless TonConnect integration
-- 📱 **Cross-platform** - Works in browsers, Node.js, and mobile environments
+- 📱 **Cross-platform** - Browser, Node.js, and mobile environments
 - 🏗️ **TypeScript First** - Full type safety and IntelliSense support
 - ⚡ **Performance Optimized** - Built-in caching and efficient API usage
 
 ## 🚀 Quick Start
 
 ### Installation
-
-Install KTON SDK using your preferred package manager:
 
 ```bash
 # Using npm
@@ -58,32 +65,65 @@ pnpm add kton-sdk
 
 ### Basic Usage
 
+#### KTON (Default - Backward Compatible)
+
 ```typescript
 import { KTON } from "kton-sdk";
 import { TonConnectUI } from "@tonconnect/ui";
 
-// Initialize TonConnect
 const tonConnectUI = new TonConnectUI({
   manifestUrl: "https://yourapp.com/tonconnect-manifest.json",
 });
 
-// Initialize KTON SDK
+// Initialize with KTON (default behavior)
 const kton = new KTON({
   connector: tonConnectUI,
-  partnerCode: 123456, // Optional: Your partner code
-  tonApiKey: "YOUR_API_KEY", // Optional: TonAPI key for higher limits
-  isTestnet: false, // Set to true for testnet
+  isTestnet: false,
 });
 
-// Start staking!
+// All your existing code works unchanged!
 await kton.stake(1); // Stake 1 TON
-const apy = await kton.getCurrentApy(); // Get current APY
-const balance = await kton.getStakedBalance(); // Check staked balance
+const apy = await kton.getCurrentApy();
+const balance = await kton.getStakedBalance();
+```
+
+#### pKTON Support
+
+```typescript
+// Initialize with pKTON
+const pkton = new KTON({
+  connector: tonConnectUI,
+  tokenType: 'pKTON', // Specify pKTON
+  isTestnet: false,
+});
+
+// Same API, different protocol
+await pkton.stake(1);
+const apy = await pkton.getCurrentApy();
+const balance = await pkton.getStakedBalance();
+```
+
+#### Dynamic Token Switching
+
+```typescript
+import { KTON, type TokenType } from "kton-sdk";
+
+const sdk = new KTON({ connector: tonConnectUI });
+
+// Check current token type
+console.log(sdk.getTokenType()); // "KTON"
+
+// Switch to pKTON
+await sdk.switchTokenType('pKTON');
+console.log(sdk.getTokenType()); // "pKTON"
+
+// Listen for switches
+sdk.addEventListener("token_type_switched", () => {
+  console.log("Now using:", sdk.getTokenType());
+});
 ```
 
 ### Browser Integration
-
-For direct HTML integration without bundlers:
 
 ```html
 <!DOCTYPE html>
@@ -96,10 +136,19 @@ For direct HTML integration without bundlers:
   <script>
     const { KTON } = window.KTONSDK;
     
+    // KTON usage
     const kton = new KTON({
       connector: new TON_CONNECT_UI.TonConnectUI({
         manifestUrl: "https://yourapp.com/tonconnect-manifest.json"
       })
+    });
+    
+    // pKTON usage
+    const pkton = new KTON({
+      connector: new TON_CONNECT_UI.TonConnectUI({
+        manifestUrl: "https://yourapp.com/tonconnect-manifest.json"
+      }),
+      tokenType: 'pKTON'
     });
   </script>
 </body>
@@ -113,6 +162,7 @@ For direct HTML integration without bundlers:
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `connector` | `IWalletConnector` | Required | TonConnect UI instance |
+| `tokenType` | `'KTON' \| 'pKTON'` | `'KTON'` | **NEW**: Token protocol type |
 | `partnerCode` | `number` | `0x0000000074746f6e` | Partner identification code |
 | `tonApiKey` | `string` | `undefined` | TonAPI key for enhanced rate limits |
 | `isTestnet` | `boolean` | `false` | Enable testnet mode |
@@ -123,66 +173,77 @@ For direct HTML integration without bundlers:
 #### Staking Operations
 
 ```typescript
-// Basic staking
-await kton.stake(1.5); // Stake 1.5 TON
+// Basic staking (works with both KTON and pKTON)
+await sdk.stake(1.5); // Stake 1.5 TON
 
 // Stake maximum available balance
-await kton.stakeMax();
+await sdk.stakeMax();
 
 // Unstaking options
-await kton.unstake(1); // Standard unstaking
-await kton.unstakeInstant(1); // Instant unstaking (higher fees)
-await kton.unstakeBestRate(1); // Best rate unstaking
+await sdk.unstake(1); // Standard unstaking
+await sdk.unstakeInstant(1); // Instant unstaking (higher fees)
+await sdk.unstakeBestRate(1); // Best rate unstaking
 ```
 
 #### Balance Management
 
 ```typescript
 // Get various balances
-const tonBalance = await kton.getBalance(); // TON balance
-const stakedBalance = await kton.getStakedBalance(); // Staked KTON balance
-const availableBalance = await kton.getAvailableBalance(); // Available for staking
+const tonBalance = await sdk.getBalance(); // TON balance
+const stakedBalance = await sdk.getStakedBalance(); // Staked token balance
+const availableBalance = await sdk.getAvailableBalance(); // Available for staking
 ```
 
 #### Analytics & Information
 
 ```typescript
 // Staking metrics
-const currentApy = await kton.getCurrentApy(); // Current APY
-const historicalApy = await kton.getHistoricalApy(); // APY history
-const tvl = await kton.getTvl(); // Total Value Locked
-const holdersCount = await kton.getHoldersCount(); // Token holders count
+const currentApy = await sdk.getCurrentApy(); // Current APY
+const historicalApy = await sdk.getHistoricalApy(); // APY history
+const tvl = await sdk.getTvl(); // Total Value Locked
+const holdersCount = await sdk.getHoldersCount(); // Token holders count
 
 // Market data
-const rates = await kton.getRates();
+const rates = await sdk.getRates();
 console.log(`1 TON = ${rates.TONUSD} USD`);
-console.log(`1 KTON = ${rates.KTONTON} TON`);
+console.log(`1 ${sdk.getTokenType()} = ${rates.KTONTON} TON`);
 
 // Validation rounds
-const { roundStart, roundEnd } = await kton.getRoundTimestamps();
+const { roundStart, roundEnd } = await sdk.getRoundTimestamps();
 
 // Withdrawal tracking
-const activeWithdrawals = await kton.getActiveWithdrawalNFTs();
-const instantLiquidity = await kton.getInstantLiquidity();
+const activeWithdrawals = await sdk.getActiveWithdrawalNFTs();
+const instantLiquidity = await sdk.getInstantLiquidity();
+```
+
+#### Token Type Management
+
+```typescript
+// Get current token type
+const currentType = sdk.getTokenType(); // 'KTON' | 'pKTON'
+
+// Switch token type
+await sdk.switchTokenType('pKTON'); // Switch to pKTON
+await sdk.switchTokenType('KTON');  // Switch to KTON
 ```
 
 #### Event Handling
 
 ```typescript
 // Listen for SDK events
-kton.addEventListener("initialized", () => {
-  console.log("KTON SDK ready!");
+sdk.addEventListener("initialized", () => {
+  console.log("SDK ready!");
 });
 
-kton.addEventListener("deinitialized", () => {
-  console.log("KTON SDK disconnected");
+sdk.addEventListener("token_type_switched", () => {
+  console.log("Token type changed to:", sdk.getTokenType());
 });
 
-kton.addEventListener("wallet_connected", () => {
+sdk.addEventListener("wallet_connected", () => {
   console.log("Wallet connected");
 });
 
-kton.addEventListener("wallet_disconnected", () => {
+sdk.addEventListener("wallet_disconnected", () => {
   console.log("Wallet disconnected");
 });
 ```
@@ -191,15 +252,35 @@ kton.addEventListener("wallet_disconnected", () => {
 
 ```typescript
 // Clear cached data
-await kton.clearStorageData(); // Clear all cache
-await kton.clearStorageUserData(); // Clear user-specific cache
+await sdk.clearStorageData(); // Clear all cache
+await sdk.clearStorageUserData(); // Clear user-specific cache
 ```
+
+## 🔗 Protocol Support
+
+### Contract Addresses
+
+| Protocol | Network | Contract Address |
+|----------|---------|------------------|
+| **KTON** | Mainnet | `EQA9HwEZD_tONfVz6lJS0PVKR5viEiEGyj9AuQewGQVnXPg0` |
+| **KTON** | Testnet | `kQD2y9eUotYw7VprrD0UJvAigDVXwgCCLWAl-DjaamCHniVr` |
+| **pKTON** | Mainnet | `EQDsW2P6nuP1zopKoNiCYj2xhqDan0cBuULQ8MH4o7dBt_7a` |
+| **pKTON** | Testnet | `kQD2y9eUotYw7VprrD0UJvAigDVXwgCCLWAl-DjaamCHniVr` |
+
+### API Endpoints
+
+| Service | Network | Endpoint |
+|---------|---------|----------|
+| **TonAPI** | Mainnet | `https://tonapi.io` |
+| **TonAPI** | Testnet | `https://testnet.tonapi.io` |
+| **TonCenter V3** | Mainnet | `https://toncenter.com/api/v3` |
+| **TonCenter V3** | Testnet | `https://testnet.toncenter.com/api/v3` |
 
 ## 🎮 Demo & Examples
 
 ### Live Demo
 
-Try the interactive demo to see KTON SDK in action:
+Try the interactive demo to see both KTON and pKTON in action:
 
 ```bash
 # Clone the repository
@@ -220,6 +301,7 @@ Visit `http://localhost:8000/demo` in your browser.
 
 **Demo Features:**
 - 🔗 Connect TON wallet (Tonkeeper, MyTonWallet, etc.)
+- 🔀 Switch between KTON and pKTON protocols
 - 💰 View balances and staking statistics
 - 📈 Real-time APY and TVL data
 - 🔄 Stake/unstake operations
@@ -229,10 +311,53 @@ Visit `http://localhost:8000/demo` in your browser.
 
 Check out these example implementations:
 
-- **[React Integration](./examples/react)** - Complete React app with KTON SDK
-- **[Vue.js Example](./examples/vue)** - Vue.js application
+- **[React Integration](./examples/react)** - Complete React app with both KTON and pKTON
+- **[Vue.js Example](./examples/vue)** - Vue.js application with token switching
 - **[Vanilla JavaScript](./examples/vanilla)** - Pure JavaScript implementation
 - **[Node.js Server](./examples/node)** - Server-side usage
+- **[Token Switching Demo](./examples/token-switching.js)** - Dynamic protocol switching
+
+## 🔄 Migration Guide
+
+### From v1.0.x to v1.1.0
+
+**✅ Zero Breaking Changes**: Your existing code will continue to work exactly as before.
+
+#### Existing Code (Still Works)
+```typescript
+// This continues to work unchanged
+const kton = new KTON({
+  connector: tonConnectUI,
+  isTestnet: false
+});
+```
+
+#### Adding pKTON Support
+```typescript
+// Option 1: Use separate instances
+const ktonSDK = new KTON({ connector, tokenType: 'KTON' });
+const pKtonSDK = new KTON({ connector, tokenType: 'pKTON' });
+
+// Option 2: Use dynamic switching
+const sdk = new KTON({ connector });
+await sdk.switchTokenType('pKTON'); // Switch to pKTON
+await sdk.switchTokenType('KTON');  // Switch back
+```
+
+### TypeScript Support
+
+```typescript
+import { KTON, type TokenType } from "kton-sdk";
+
+const tokenType: TokenType = 'pKTON'; // Type-safe token selection
+
+// Full TypeScript IntelliSense support
+const sdk = new KTON({
+  connector: tonConnectUI,
+  tokenType, // Fully typed
+  isTestnet: false
+});
+```
 
 ## 🛠️ Development
 
@@ -270,6 +395,7 @@ npm run dev
 | `npm run lint` | Lint code with ESLint |
 | `npm run format` | Format code with Prettier |
 | `npm run test` | Run test suite |
+| `npm run docs` | Start documentation server |
 
 ## 🚀 Deployment
 
@@ -288,7 +414,7 @@ npm publish
 <script src="https://unpkg.com/kton-sdk@latest/dist/kton-sdk.min.js"></script>
 
 <!-- Specific version -->
-<script src="https://unpkg.com/kton-sdk@1.0.0/dist/kton-sdk.min.js"></script>
+<script src="https://unpkg.com/kton-sdk@1.1.0/dist/kton-sdk.min.js"></script>
 ```
 
 ## 🤝 Contributing
@@ -311,7 +437,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- 📚 **Documentation**: [GitHub Pages](https://KTON-IO.github.io/KTON-SDK)
+- 📚 **Documentation**: [pKTON Support Guide](./docs/pKTON-support.md)
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/KTON-IO/KTON-SDK/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/KTON-IO/KTON-SDK/discussions)
 - 🔗 **TON Community**: [TON Developers Chat](https://t.me/tondev_eng)
@@ -322,6 +448,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Vite](https://vitejs.dev/) - Build tool
 - [TON SDK](https://github.com/ton-org) - TON blockchain integration
 - [TonConnect](https://docs.ton.org/develop/dapps/ton-connect) - Wallet connectivity
+
+## 📊 Bundle Size
+
+- **ESM**: 680.36 kB (129.47 kB gzipped)
+- **UMD**: 339.48 kB (99.76 kB gzipped)
+- **TypeScript Declarations**: Full type support included
 
 ---
 
