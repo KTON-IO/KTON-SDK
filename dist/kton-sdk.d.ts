@@ -20,7 +20,8 @@ export declare class KTON extends EventTarget {
     private cache;
     ready: boolean;
     isTestnet: boolean;
-    constructor({ connector, partnerCode, tonApiKey, cacheFor, isTestnet, }: KTONOptions);
+    tokenType: TokenType;
+    constructor({ connector, partnerCode, tonApiKey, cacheFor, isTestnet, tokenType, }: KTONOptions);
     private getPayouts;
     private setupClient;
     private initialize;
@@ -113,6 +114,8 @@ export declare class KTON extends EventTarget {
         roundStart: number;
         roundEnd: number;
     }>;
+    getTokenType(): TokenType;
+    switchTokenType(newTokenType: TokenType): Promise<void>;
     static toReadableAddress(address: string, bounceable?: boolean): string;
 }
 
@@ -122,6 +125,7 @@ declare interface KTONOptions {
     tonApiKey?: string;
     cacheFor?: number;
     isTestnet?: boolean;
+    tokenType?: TokenType;
 }
 
 declare interface NftItemWithEstimates extends NftItem {
@@ -133,6 +137,8 @@ declare interface NftItemWithEstimates extends NftItem {
 declare interface SendTransactionResponse {
     boc: string;
 }
+
+export declare type TokenType = 'KTON' | 'pKTON';
 
 declare interface TransactionDetails {
     validUntil: number;
