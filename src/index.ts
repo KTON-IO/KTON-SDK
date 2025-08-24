@@ -1,1 +1,1 @@
-export { KTON } from "./kton";
+export { KTON, type TokenType } from "./kton";
