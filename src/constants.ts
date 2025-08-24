@@ -17,6 +17,7 @@ export const BLOCKCHAIN = {
 // New API endpoints
 export const API = {
   TONCENTER_V3: "https://toncenter.com/api/v3",
+  TONCENTER_V3_TESTNET: "https://testnet.toncenter.com/api/v3",
   JETTON_INDEX: "https://jetton-index.tonscan.org/public-dyor",
 };
 
