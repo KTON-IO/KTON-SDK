@@ -47,12 +47,15 @@ interface IWalletConnector {
   onStatusChange: (cb: (wallet: unknown) => void) => void;
 }
 
+type TokenType = 'KTON' | 'pKTON';
+
 interface KTONOptions {
   connector: IWalletConnector;
   partnerCode?: number;
   tonApiKey?: string;
   cacheFor?: number;
   isTestnet?: boolean;
+  tokenType?: TokenType;
 }
 
 interface NftItemWithEstimates extends NftItem {
@@ -80,6 +83,7 @@ class KTON extends EventTarget {
   private cache: NetworkCache;
   public ready: boolean;
   public isTestnet: boolean;
+  public tokenType: TokenType;
 
   constructor({
     connector,
@@ -87,6 +91,7 @@ class KTON extends EventTarget {
     tonApiKey,
     cacheFor,
     isTestnet = false,
+    tokenType = 'KTON',
   }: KTONOptions) {
     super();
     this.connector = connector;
@@ -97,6 +102,7 @@ class KTON extends EventTarget {
     );
     this.ready = false;
     this.isTestnet = isTestnet;
+    this.tokenType = tokenType;
 
     this.setupClient();
     this.initialize().catch(error => {
@@ -131,7 +137,7 @@ class KTON extends EventTarget {
   }
 
   private async setupClient(): Promise<void> {
-    log("Setting up KTON SDK, isTestnet:", this.isTestnet);
+    log(`Setting up ${this.tokenType} SDK, isTestnet:`, this.isTestnet);
     const baseApiParams = this.tonApiKey
       ? {
           headers: {
@@ -145,11 +151,20 @@ class KTON extends EventTarget {
       baseApiParams,
     });
     this.client = new Api(httpClient);
-    this.stakingContractAddress = Address.parse(
-      this.isTestnet
-        ? CONTRACT.STAKING_CONTRACT_ADDRESS_TESTNET
-        : CONTRACT.STAKING_CONTRACT_ADDRESS
-    );
+    
+    // Select contract address based on token type and network
+    let contractAddress: string;
+    if (this.tokenType === 'pKTON') {
+      contractAddress = this.isTestnet
+        ? CONTRACT.PKTON_STAKING_CONTRACT_ADDRESS_TESTNET
+        : CONTRACT.PKTON_STAKING_CONTRACT_ADDRESS;
+    } else {
+      contractAddress = this.isTestnet
+        ? CONTRACT.KTON_STAKING_CONTRACT_ADDRESS_TESTNET
+        : CONTRACT.KTON_STAKING_CONTRACT_ADDRESS;
+    }
+    
+    this.stakingContractAddress = Address.parse(contractAddress);
   }
 
   private async initialize(): Promise<void> {
@@ -856,6 +871,37 @@ class KTON extends EventTarget {
     }
   }
 
+  getTokenType(): TokenType {
+    return this.tokenType;
+  }
+
+  async switchTokenType(newTokenType: TokenType): Promise<void> {
+    if (this.tokenType === newTokenType) {
+      return; // No change needed
+    }
+    
+    this.tokenType = newTokenType;
+    
+    // Clear previous wallet state
+    this.walletAddress = undefined;
+    KTON.jettonWalletAddress = undefined;
+    this.ready = false;
+    
+    // Re-setup client with new contract address
+    await this.setupClient();
+    
+    // Re-initialize if wallet is connected
+    if (this.connector.wallet?.account?.address) {
+      try {
+        await this.setupWallet(this.connector.wallet);
+        this.dispatchEvent(new Event("token_type_switched"));
+      } catch (error) {
+        console.error("Error re-initializing after token type switch:", error);
+        this.deinitialize();
+      }
+    }
+  }
+
   static toReadableAddress(
     address: string,
     bounceable: boolean = true
@@ -864,4 +910,4 @@ class KTON extends EventTarget {
   }
 }
 
-export { KTON };
+export { KTON, type TokenType };
