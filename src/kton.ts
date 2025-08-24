@@ -47,7 +47,7 @@ interface IWalletConnector {
   onStatusChange: (cb: (wallet: unknown) => void) => void;
 }
 
-type TokenType = 'KTON' | 'pKTON';
+type TokenType = "KTON" | "pKTON";
 
 interface KTONOptions {
   connector: IWalletConnector;
@@ -91,7 +91,7 @@ class KTON extends EventTarget {
     tonApiKey,
     cacheFor,
     isTestnet = false,
-    tokenType = 'KTON',
+    tokenType = "KTON",
   }: KTONOptions) {
     super();
     this.connector = connector;
@@ -154,7 +154,7 @@ class KTON extends EventTarget {
     
     // Select contract address based on token type and network
     let contractAddress: string;
-    if (this.tokenType === 'pKTON') {
+    if (this.tokenType === "pKTON") {
       contractAddress = this.isTestnet
         ? CONTRACT.PKTON_STAKING_CONTRACT_ADDRESS_TESTNET
         : CONTRACT.PKTON_STAKING_CONTRACT_ADDRESS;
