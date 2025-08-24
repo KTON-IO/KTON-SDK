@@ -4,23 +4,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KTON SDK Demo</title> 
-  <script src="./dist/kton-sdk.min.js"></script>
+  <title>KTON/pKTON SDK Demo</title> 
+  <script src="../dist/kton-sdk.min.js"></script>
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
 </head>
 
 <body>
-  <h1>KTON SDK Demo</h1>
+  <h1>KTON/pKTON SDK Demo</h1>
+  
+  <!-- Token Type Selection -->
+  <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
+    <h3>Token Type Selection</h3>
+    <label>
+      <input type="radio" name="tokenType" value="KTON" checked> KTON
+    </label>
+    <label style="margin-left: 20px;">
+      <input type="radio" name="tokenType" value="pKTON"> pKTON
+    </label>
+    <br>
+    <small>Current: <span id="currentTokenType">KTON</span></small>
+  </div>
+
   <button id="connectWallet">Connect Wallet</button>
   <button id="disconnectWallet" style="display: none">
     Disconnect Wallet
   </button>
   <button id="stake">Stake 1 TON</button>
   <button id="stakeMax">Stake MAX</button>
-  <button id="unstake">Unstake 1 KTON</button>
-  <button id="unstakeInstant">Unstake 1 KTON Instant</button>
-  <button id="unstakeBestRate">Unstake 1 KTON Best Rate</button>
+  <button id="unstake">Unstake 1 <span class="token-name">KTON</span></button>
+  <button id="unstakeInstant">Unstake 1 <span class="token-name">KTON</span> Instant</button>
+  <button id="unstakeBestRate">Unstake 1 <span class="token-name">KTON</span> Best Rate</button>
   <button id="refreshBalances">Refresh Balances</button>
   <button id="getRounds">Get Rounds info</button>
   <button id="getPayouts">Get Depost/Withdrawal Receipts</button>
@@ -34,15 +48,15 @@
     Available to stake: <span id="availableBalance"></span>
   </div>
   <div id="stakedBalanceDisplay">
-    Staked TON (KTON): <span id="stakedBalance"></span>
+    Staked TON (<span class="token-name">KTON</span>): <span id="stakedBalance"></span>
   </div>
   <div id="apyDisplay">APY: <span id="apy"></span></div>
   <div id="tvlDisplay">TVL: <span id="tvl"></span></div>
-  <div id="holdersDisplay">KTON Holders: <span id="holders"></span></div>
+  <div id="holdersDisplay"><span class="token-name">KTON</span> Holders: <span id="holders"></span></div>
   <div id="roundsDisplay">Rounds: <span id="rounds"></span></div>
   <div id="TONUSDRateDisplay">1 TON = <span id="TONUSD">0</span>$</div>
   <div id="TONKTONRateDisplay">
-    1 KTON = <span id="KTONTON">0</span> TON
+    1 <span class="token-name">KTON</span> = <span id="KTONTON">0</span> TON
   </div>
   <div id="activeWithdrawals"></div>
   <br /><br />
@@ -61,8 +75,55 @@
       isTestnet: new URLSearchParams(window.location.search).get("testnet") !== null,
     });
 
-    // Fetch and display APY, TVL, and KTON holders count on page load
-    window.addEventListener("DOMContentLoaded", async () => {
+    // Token type switching functionality
+    function updateTokenDisplay(tokenType) {
+      document.getElementById("currentTokenType").innerText = tokenType;
+      const tokenNameElements = document.querySelectorAll(".token-name");
+      tokenNameElements.forEach(element => {
+        element.innerText = tokenType;
+      });
+    }
+
+    // Handle token type radio button changes
+    document.querySelectorAll('input[name="tokenType"]').forEach(radio => {
+      radio.addEventListener('change', async (e) => {
+        const newTokenType = e.target.value;
+        try {
+          await kton.switchTokenType(newTokenType);
+          updateTokenDisplay(newTokenType);
+          
+          // Clear previous data and refresh
+          document.getElementById("stakedBalance").innerText = "";
+          document.getElementById("apy").innerText = "";
+          document.getElementById("tvl").innerText = "";
+          document.getElementById("holders").innerText = "";
+          document.getElementById("KTONTON").innerText = "";
+          
+          // Reload data for new token type
+          await loadTokenData();
+          
+          // Refresh balances if wallet is connected
+          if (kton.ready) {
+            await updateBalances();
+          }
+          
+          alert(`Switched to ${newTokenType} successfully!`);
+        } catch (error) {
+          console.error("Error switching token type:", error);
+          alert(`Error switching to ${newTokenType}: ${error.message}`);
+          // Revert radio selection
+          document.querySelector(`input[value="${kton.getTokenType()}"]`).checked = true;
+        }
+      });
+    });
+
+    // Listen for token type switches
+    kton.addEventListener("token_type_switched", () => {
+      console.log("Token type switched to:", kton.getTokenType());
+    });
+
+    // Function to load token-specific data
+    async function loadTokenData() {
       try {
         const apy = await kton.getCurrentApy(600000);
         document.getElementById("apy").innerText = apy;
@@ -73,19 +134,20 @@
         const holders = await kton.getHoldersCount(600000);
         document.getElementById("holders").innerText = holders;
 
-        const { roundStart, roundEnd } = await kton.getRoundTimestamps(
-          5000
-        );
-        document.getElementById(
-          "rounds"
-        ).innerText = `start ${roundStart}, end ${roundEnd}`;
+        const { roundStart, roundEnd } = await kton.getRoundTimestamps(5000);
+        document.getElementById("rounds").innerText = `start ${roundStart}, end ${roundEnd}`;
 
         const rates = await kton.getRates(600000);
         document.getElementById("TONUSD").innerText = rates.TONUSD;
         document.getElementById("KTONTON").innerText = rates.KTONTON;
       } catch (error) {
-        console.error("Error fetching initial data:", error);
+        console.error("Error fetching token data:", error);
       }
+    }
+
+    // Fetch and display data on page load
+    window.addEventListener("DOMContentLoaded", async () => {
+      await loadTokenData();
     });
 
     kton.addEventListener("initialized", async () => {
@@ -289,7 +351,7 @@
             
             const withdrawalInfo = `
               <div style="margin-bottom: 8px;">
-                <strong>Withdrawal: ${withdrawal.KTONAmount ? (withdrawal.KTONAmount / 1e9).toFixed(4) : '0'} KTON</strong>
+                <strong>Withdrawal: ${withdrawal.KTONAmount ? (withdrawal.KTONAmount / 1e9).toFixed(4) : '0'} ${kton.getTokenType()}</strong>
               </div>
               <div style="margin-bottom: 4px;">
                 <span>Estimated Payout: <strong>${estimatedTime}</strong></span>
@@ -337,12 +399,24 @@
       document.getElementById("availableBalance").innerText = availableBalance;
     }
 
+    async function updateBalances() {
+      try {
+        await getWalletBalance();
+        await getStakedBalance();
+        await getAvailableBalance();
+      } catch (error) {
+        console.warn("Error updating balances:", error);
+      }
+    }
+
     document
       .getElementById("refreshBalances")
       .addEventListener("click", async () => {
         try {
           await getWalletBalance();
           await getStakedBalance();
+          await getAvailableBalance();
+          await loadTokenData(); // Refresh token-specific data too
         } catch (error) {
           console.warn("Error refreshing balances:", error);
         }
