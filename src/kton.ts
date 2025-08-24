@@ -151,7 +151,7 @@ class KTON extends EventTarget {
       baseApiParams,
     });
     this.client = new Api(httpClient);
-    
+
     // Select contract address based on token type and network
     let contractAddress: string;
     if (this.tokenType === "pKTON") {
@@ -163,7 +163,7 @@ class KTON extends EventTarget {
         ? CONTRACT.KTON_STAKING_CONTRACT_ADDRESS_TESTNET
         : CONTRACT.KTON_STAKING_CONTRACT_ADDRESS;
     }
-    
+
     this.stakingContractAddress = Address.parse(contractAddress);
   }
 
@@ -879,17 +879,17 @@ class KTON extends EventTarget {
     if (this.tokenType === newTokenType) {
       return; // No change needed
     }
-    
+
     this.tokenType = newTokenType;
-    
+
     // Clear previous wallet state
     this.walletAddress = undefined;
     KTON.jettonWalletAddress = undefined;
     this.ready = false;
-    
+
     // Re-setup client with new contract address
     await this.setupClient();
-    
+
     // Re-initialize if wallet is connected
     if (this.connector.wallet?.account?.address) {
       try {
