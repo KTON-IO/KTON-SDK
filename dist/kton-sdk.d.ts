@@ -138,7 +138,7 @@ declare interface SendTransactionResponse {
     boc: string;
 }
 
-export declare type TokenType = 'KTON' | 'pKTON';
+export declare type TokenType = "KTON" | "pKTON";
 
 declare interface TransactionDetails {
     validUntil: number;
