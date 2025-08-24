@@ -331,7 +331,7 @@ class KTON extends EventTarget {
   private async fetchJettonMasterInfo(
     jettonAddress: string
   ): Promise<{ metadata?: { holdersCount?: number } }> {
-    const url = `${API.TONCENTER_V3}/jetton/masters?address=${jettonAddress}`;
+    const url = `${this.isTestnet ? API.TONCENTER_V3_TESTNET : API.TONCENTER_V3}/jetton/masters?address=${jettonAddress}`;
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
