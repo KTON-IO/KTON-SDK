@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>KTON/pKTON SDK Demo</title> 
-  <script src="../dist/kton-sdk.min.js"></script>
+  <script src="/dist/kton-sdk.min.js"></script>
   <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
   <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
 </head>
@@ -90,6 +90,7 @@
         const newTokenType = e.target.value;
         try {
           await kton.switchTokenType(newTokenType);
+          await kton.clearStorageData(); // Clear cache after switching
           updateTokenDisplay(newTokenType);
           
           // Clear previous data and refresh
@@ -106,8 +107,6 @@
           if (kton.ready) {
             await updateBalances();
           }
-          
-          alert(`Switched to ${newTokenType} successfully!`);
         } catch (error) {
           console.error("Error switching token type:", error);
           alert(`Error switching to ${newTokenType}: ${error.message}`);
