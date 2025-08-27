@@ -12,6 +12,7 @@ declare interface IWalletConnector {
 export declare class KTON extends EventTarget {
     private connector;
     private client;
+    private backupClients;
     private walletAddress?;
     private stakingContractAddress?;
     private partnerCode;
