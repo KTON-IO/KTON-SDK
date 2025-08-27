@@ -75,6 +75,7 @@ export interface PayoutData {
 class KTON extends EventTarget {
   private connector: IWalletConnector;
   private client!: Api<unknown>;
+  private backupClients: Api<unknown>[] = [];
   private walletAddress?: Address;
   private stakingContractAddress?: Address;
   private partnerCode: number;
@@ -146,11 +147,26 @@ class KTON extends EventTarget {
           },
         }
       : {};
+
+    // Setup primary client
     const httpClient = new HttpClient({
       baseUrl: this.isTestnet ? BLOCKCHAIN.API_URL_TESTNET : BLOCKCHAIN.API_URL,
       baseApiParams,
     });
     this.client = new Api(httpClient);
+
+    // Setup backup clients
+    const backupUrls = this.isTestnet 
+      ? BLOCKCHAIN.BACKUP_API_URLS_TESTNET 
+      : BLOCKCHAIN.BACKUP_API_URLS;
+    
+    this.backupClients = backupUrls.map(url => {
+      const backupHttpClient = new HttpClient({
+        baseUrl: url,
+        baseApiParams,
+      });
+      return new Api(backupHttpClient);
+    });
 
     // Select contract address based on token type and network
     let contractAddress: string;
@@ -275,13 +291,38 @@ class KTON extends EventTarget {
 
   async fetchStakingPoolInfo(ttl?: number) {
     const getPoolInfo = async () => {
-      const poolFullData =
-        await this.client.blockchain.execGetMethodForBlockchainAccount(
-          this.stakingContractAddress!.toString(),
-          "get_pool_full_data"
-        );
+      // Try primary client first
+      try {
+        const poolFullData =
+          await this.client.blockchain.execGetMethodForBlockchainAccount(
+            this.stakingContractAddress!.toString(),
+            "get_pool_full_data"
+          );
 
-      return parsePoolFullData(poolFullData.stack);
+        return parsePoolFullData(poolFullData.stack);
+      } catch (primaryError) {
+        log(`Primary API failed for pool info: ${primaryError}`);
+        
+        // Try backup clients
+        for (let i = 0; i < this.backupClients.length; i++) {
+          try {
+            const poolFullData =
+              await this.backupClients[i]!.blockchain.execGetMethodForBlockchainAccount(
+                this.stakingContractAddress!.toString(),
+                "get_pool_full_data"
+              );
+
+            log(`Successfully used backup API ${i + 1} for pool info`);
+            return parsePoolFullData(poolFullData.stack);
+          } catch (backupError) {
+            log(`Backup API ${i + 1} failed for pool info: ${backupError}`);
+            continue;
+          }
+        }
+        
+        // If all APIs fail, throw the original error
+        throw primaryError;
+      }
     };
 
     return this.cache.get("poolInfo", getPoolInfo, ttl);
@@ -311,14 +352,33 @@ class KTON extends EventTarget {
 
     if (!stakingAddress) throw new Error("Staking contract address not set.");
 
+    const getHistoricalApyData = async () => {
+      // Try primary client first
+      try {
+        const stakingHistory = await this.client!.staking.getStakingPoolHistory(stakingAddress.toString());
+        return stakingHistory.apy;
+      } catch (primaryError) {
+        log(`Primary API failed for historical APY: ${primaryError}`);
+        
+        // Try backup clients
+        for (let i = 0; i < this.backupClients.length; i++) {
+          try {
+            const stakingHistory = await this.backupClients[i]!.staking.getStakingPoolHistory(stakingAddress.toString());
+            log(`Successfully used backup API ${i + 1} for historical APY`);
+            return stakingHistory.apy;
+          } catch (backupError) {
+            log(`Backup API ${i + 1} failed for historical APY: ${backupError}`);
+            continue;
+          }
+        }
+        
+        // If all APIs fail, throw the original error
+        throw primaryError;
+      }
+    };
+
     try {
-      const stakingHistory = await this.cache.get(
-        "stakingHistory",
-        () =>
-          this.client!.staking.getStakingPoolHistory(stakingAddress.toString()),
-        ttl
-      );
-      return stakingHistory.apy;
+      return await this.cache.get("stakingHistory", getHistoricalApyData, ttl);
     } catch {
       console.error("Failed to get historical APY");
       throw new Error("Could not retrieve historical APY.");

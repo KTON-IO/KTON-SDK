@@ -12,6 +12,14 @@ export const BLOCKCHAIN = {
   CHAIN_DEV: "-3",
   API_URL: "https://tonapi.io",
   API_URL_TESTNET: "https://testnet.tonapi.io",
+  // Backup API endpoints
+  BACKUP_API_URLS: [
+    "https://toncenter.com/api/v2",
+    "https://tonapi.toncoin.org"
+  ],
+  BACKUP_API_URLS_TESTNET: [
+    "https://testnet.toncenter.com/api/v2"
+  ],
 };
 
 // New API endpoints
