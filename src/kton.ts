@@ -156,10 +156,10 @@ class KTON extends EventTarget {
     this.client = new Api(httpClient);
 
     // Setup backup clients
-    const backupUrls = this.isTestnet 
-      ? BLOCKCHAIN.BACKUP_API_URLS_TESTNET 
+    const backupUrls = this.isTestnet
+      ? BLOCKCHAIN.BACKUP_API_URLS_TESTNET
       : BLOCKCHAIN.BACKUP_API_URLS;
-    
+
     this.backupClients = backupUrls.map(url => {
       const backupHttpClient = new HttpClient({
         baseUrl: url,
@@ -302,15 +302,16 @@ class KTON extends EventTarget {
         return parsePoolFullData(poolFullData.stack);
       } catch (primaryError) {
         log(`Primary API failed for pool info: ${primaryError}`);
-        
+
         // Try backup clients
         for (let i = 0; i < this.backupClients.length; i++) {
           try {
-            const poolFullData =
-              await this.backupClients[i]!.blockchain.execGetMethodForBlockchainAccount(
-                this.stakingContractAddress!.toString(),
-                "get_pool_full_data"
-              );
+            const poolFullData = await this.backupClients[
+              i
+            ]!.blockchain.execGetMethodForBlockchainAccount(
+              this.stakingContractAddress!.toString(),
+              "get_pool_full_data"
+            );
 
             log(`Successfully used backup API ${i + 1} for pool info`);
             return parsePoolFullData(poolFullData.stack);
@@ -319,7 +320,7 @@ class KTON extends EventTarget {
             continue;
           }
         }
-        
+
         // If all APIs fail, throw the original error
         throw primaryError;
       }
@@ -355,23 +356,29 @@ class KTON extends EventTarget {
     const getHistoricalApyData = async () => {
       // Try primary client first
       try {
-        const stakingHistory = await this.client!.staking.getStakingPoolHistory(stakingAddress.toString());
+        const stakingHistory = await this.client!.staking.getStakingPoolHistory(
+          stakingAddress.toString()
+        );
         return stakingHistory.apy;
       } catch (primaryError) {
         log(`Primary API failed for historical APY: ${primaryError}`);
-        
+
         // Try backup clients
         for (let i = 0; i < this.backupClients.length; i++) {
           try {
-            const stakingHistory = await this.backupClients[i]!.staking.getStakingPoolHistory(stakingAddress.toString());
+            const stakingHistory = await this.backupClients[
+              i
+            ]!.staking.getStakingPoolHistory(stakingAddress.toString());
             log(`Successfully used backup API ${i + 1} for historical APY`);
             return stakingHistory.apy;
           } catch (backupError) {
-            log(`Backup API ${i + 1} failed for historical APY: ${backupError}`);
+            log(
+              `Backup API ${i + 1} failed for historical APY: ${backupError}`
+            );
             continue;
           }
         }
-        
+
         // If all APIs fail, throw the original error
         throw primaryError;
       }
