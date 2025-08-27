@@ -44,7 +44,7 @@ jobs:
           cp demo/index.html gh-pages/
           cp -r dist gh-pages/
           # Update the script src path to work with GitHub Pages
-          sed -i 's|src="../dist/kton-sdk.min.js"|src="./dist/kton-sdk.min.js"|g' gh-pages/index.html
+          sed -i 's|src="../dist/kton-sdk.min.js"|src="dist/kton-sdk.min.js"|g' gh-pages/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
