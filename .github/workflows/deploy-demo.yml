@@ -42,9 +42,11 @@ jobs:
         run: |
           mkdir -p gh-pages/demo
           cp demo/index.html gh-pages/demo/
+          cp demo/index.html gh-pages/  # Also copy to root for main page
           cp -r dist gh-pages/
-          # Fix the script path in the demo HTML for GitHub Pages deployment
+          # Fix the script path in both demo HTML files for GitHub Pages deployment
           sed -i 's|../dist/kton-sdk.min.js|/KTON-SDK/dist/kton-sdk.min.js|g' gh-pages/demo/index.html
+          sed -i 's|../dist/kton-sdk.min.js|/KTON-SDK/dist/kton-sdk.min.js|g' gh-pages/index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
