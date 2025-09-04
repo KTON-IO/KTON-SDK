@@ -326,7 +326,7 @@ class KTON extends EventTarget {
       }
     };
 
-    return this.cache.get("poolInfo", getPoolInfo, ttl);
+    return this.cache.get(`poolInfo-${this.tokenType}`, getPoolInfo, ttl);
   }
 
   async getCurrentApy(ttl?: number): Promise<number> {
@@ -385,7 +385,7 @@ class KTON extends EventTarget {
     };
 
     try {
-      return await this.cache.get("stakingHistory", getHistoricalApyData, ttl);
+      return await this.cache.get(`stakingHistory-${this.tokenType}`, getHistoricalApyData, ttl);
     } catch {
       console.error("Failed to get historical APY");
       throw new Error("Could not retrieve historical APY.");
@@ -525,9 +525,9 @@ class KTON extends EventTarget {
 
   async clearStorageUserData(): Promise<void> {
     this.cache.clear([
-      "network-cache-payouts",
-      "network-cache-stakedBalance",
-      "network-cache-account",
+      `network-cache-payouts-${this.tokenType}`,
+      `network-cache-stakedBalance-${this.tokenType}`,
+      `network-cache-account-${this.tokenType}`,
     ]);
   }
 
@@ -578,7 +578,7 @@ class KTON extends EventTarget {
 
     try {
       const jettonWalletData = await this.cache.get(
-        `stakedBalance-${addressString}`,
+        `stakedBalance-${this.tokenType}-${addressString}`,
         () =>
           this.client!.blockchain.execGetMethodForBlockchainAccount(
             addressString,
@@ -652,7 +652,7 @@ class KTON extends EventTarget {
   // instant liquidity is the amount of TON that can be withdrawn immediately, so it should be `total_balance - requested_for_withdrawal`
   async getInstantLiquidityDeprecated(ttl?: number): Promise<number> {
     const account = await this.cache.get(
-      "contract-account",
+      `contract-account-${this.tokenType}`,
       () =>
         this.client!.accounts.getAccount(
           this.isTestnet
@@ -742,7 +742,7 @@ class KTON extends EventTarget {
   async getActiveWithdrawalNFTs(ttl?: number): Promise<NftItemWithEstimates[]> {
     try {
       const payouts = await this.cache.get(
-        "payouts",
+        `payouts-${this.tokenType}`,
         () => this.getPayouts(),
         ttl
       );
