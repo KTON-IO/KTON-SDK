@@ -6,6 +6,9 @@ import { NetworkCache } from "./cache";
 import { log } from "./utils";
 import { parsePoolFullData } from "./pool";
 
+// Global timeout function declaration for browser/node compatibility
+declare const setTimeout: (callback: () => void, ms: number) => number;
+
 export function toReadableAddress(
   address: string,
   bounceable: boolean = true
@@ -82,6 +85,12 @@ class KTON extends EventTarget {
   private static jettonWalletAddress?: Address;
   private tonApiKey?: string;
   private cache: NetworkCache;
+  private lastRequestTime = 0;
+  private requestQueue: Array<() => Promise<void>> = [];
+  private isProcessingQueue = false;
+  private backupLastRequestTimes: number[] = [];
+  private backupRequestQueues: Array<Array<() => Promise<void>>> = [];
+  private backupIsProcessingQueues: boolean[] = [];
   public ready: boolean;
   public isTestnet: boolean;
   public tokenType: TokenType;
@@ -109,6 +118,102 @@ class KTON extends EventTarget {
     this.initialize().catch(error => {
       console.error("Initialization error:", error);
     });
+  }
+
+  private async rateLimit<T>(apiCall: () => Promise<T>): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const executeRequest = async () => {
+        try {
+          const now = Date.now();
+          const timeSinceLastRequest = now - this.lastRequestTime;
+
+          // Ensure at least 1 second between requests
+          if (timeSinceLastRequest < 1000) {
+            await new Promise<void>(resolve =>
+              setTimeout(() => resolve(), 1000 - timeSinceLastRequest)
+            );
+          }
+
+          this.lastRequestTime = Date.now();
+          const result = await apiCall();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      this.requestQueue.push(executeRequest);
+      this.processQueue();
+    });
+  }
+
+  private async processQueue(): Promise<void> {
+    if (this.isProcessingQueue || this.requestQueue.length === 0) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
+
+    while (this.requestQueue.length > 0) {
+      const request = this.requestQueue.shift();
+      if (request) {
+        await request();
+      }
+    }
+
+    this.isProcessingQueue = false;
+  }
+
+  private async rateLimitBackup<T>(
+    backupIndex: number,
+    apiCall: () => Promise<T>
+  ): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const executeRequest = async () => {
+        try {
+          const now = Date.now();
+          const timeSinceLastRequest =
+            now - (this.backupLastRequestTimes[backupIndex] || 0);
+
+          // Ensure at least 1 second between requests for this backup client
+          if (timeSinceLastRequest < 1000) {
+            await new Promise<void>(resolve =>
+              setTimeout(() => resolve(), 1000 - timeSinceLastRequest)
+            );
+          }
+
+          this.backupLastRequestTimes[backupIndex] = Date.now();
+          const result = await apiCall();
+          resolve(result);
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      this.backupRequestQueues[backupIndex]?.push(executeRequest);
+      this.processBackupQueue(backupIndex);
+    });
+  }
+
+  private async processBackupQueue(backupIndex: number): Promise<void> {
+    if (
+      this.backupIsProcessingQueues[backupIndex] ||
+      !this.backupRequestQueues[backupIndex] ||
+      this.backupRequestQueues[backupIndex]!.length === 0
+    ) {
+      return;
+    }
+
+    this.backupIsProcessingQueues[backupIndex] = true;
+
+    while (this.backupRequestQueues[backupIndex]!.length > 0) {
+      const request = this.backupRequestQueues[backupIndex]!.shift();
+      if (request) {
+        await request();
+      }
+    }
+
+    this.backupIsProcessingQueues[backupIndex] = false;
   }
 
   private async getPayouts(): Promise<PayoutData | undefined> {
@@ -167,6 +272,15 @@ class KTON extends EventTarget {
       });
       return new Api(backupHttpClient);
     });
+
+    // Initialize backup rate limiting arrays
+    this.backupLastRequestTimes = new Array(this.backupClients.length).fill(0);
+    this.backupRequestQueues = new Array(this.backupClients.length)
+      .fill(null)
+      .map(() => []);
+    this.backupIsProcessingQueues = new Array(this.backupClients.length).fill(
+      false
+    );
 
     // Select contract address based on token type and network
     let contractAddress: string;
@@ -293,11 +407,12 @@ class KTON extends EventTarget {
     const getPoolInfo = async () => {
       // Try primary client first
       try {
-        const poolFullData =
-          await this.client.blockchain.execGetMethodForBlockchainAccount(
+        const poolFullData = await this.rateLimit(() =>
+          this.client.blockchain.execGetMethodForBlockchainAccount(
             this.stakingContractAddress!.toString(),
             "get_pool_full_data"
-          );
+          )
+        );
 
         return parsePoolFullData(poolFullData.stack);
       } catch (primaryError) {
@@ -306,11 +421,13 @@ class KTON extends EventTarget {
         // Try backup clients
         for (let i = 0; i < this.backupClients.length; i++) {
           try {
-            const poolFullData = await this.backupClients[
-              i
-            ]!.blockchain.execGetMethodForBlockchainAccount(
-              this.stakingContractAddress!.toString(),
-              "get_pool_full_data"
+            const poolFullData = await this.rateLimitBackup(i, () =>
+              this.backupClients[
+                i
+              ]!.blockchain.execGetMethodForBlockchainAccount(
+                this.stakingContractAddress!.toString(),
+                "get_pool_full_data"
+              )
             );
 
             log(`Successfully used backup API ${i + 1} for pool info`);
@@ -356,8 +473,8 @@ class KTON extends EventTarget {
     const getHistoricalApyData = async () => {
       // Try primary client first
       try {
-        const stakingHistory = await this.client!.staking.getStakingPoolHistory(
-          stakingAddress.toString()
+        const stakingHistory = await this.rateLimit(() =>
+          this.client!.staking.getStakingPoolHistory(stakingAddress.toString())
         );
         return stakingHistory.apy;
       } catch (primaryError) {
@@ -366,9 +483,11 @@ class KTON extends EventTarget {
         // Try backup clients
         for (let i = 0; i < this.backupClients.length; i++) {
           try {
-            const stakingHistory = await this.backupClients[
-              i
-            ]!.staking.getStakingPoolHistory(stakingAddress.toString());
+            const stakingHistory = await this.rateLimitBackup(i, () =>
+              this.backupClients[i]!.staking.getStakingPoolHistory(
+                stakingAddress.toString()
+              )
+            );
             log(`Successfully used backup API ${i + 1} for historical APY`);
             return stakingHistory.apy;
           } catch (backupError) {
@@ -471,7 +590,9 @@ class KTON extends EventTarget {
 
       // Fallback to original TonAPI
       try {
-        const response = await this.client.jettons.getJettonInfo(jettonAddress);
+        const response = await this.rateLimit(() =>
+          this.client.jettons.getJettonInfo(jettonAddress)
+        );
         return response.holders_count;
       } catch (tonApiError) {
         // If testnet, return 0 as jetton might not exist
@@ -540,10 +661,12 @@ class KTON extends EventTarget {
       const response = await this.cache.get(
         "tonPrice",
         () =>
-          this.client!.rates.getRates({
-            tokens: ["ton"],
-            currencies: ["usd"],
-          }),
+          this.rateLimit(() =>
+            this.client!.rates.getRates({
+              tokens: ["ton"],
+              currencies: ["usd"],
+            })
+          ),
         ttl
       );
 
@@ -584,9 +707,11 @@ class KTON extends EventTarget {
       const jettonWalletData = await this.cache.get(
         `stakedBalance-${this.tokenType}-${addressString}`,
         () =>
-          this.client!.blockchain.execGetMethodForBlockchainAccount(
-            addressString,
-            "get_wallet_data"
+          this.rateLimit(() =>
+            this.client!.blockchain.execGetMethodForBlockchainAccount(
+              addressString,
+              "get_wallet_data"
+            )
           ),
         ttl
       );
@@ -622,7 +747,10 @@ class KTON extends EventTarget {
     try {
       const account = await this.cache.get(
         "account",
-        () => this.client!.accounts.getAccount(walletAddress.toString()),
+        () =>
+          this.rateLimit(() =>
+            this.client!.accounts.getAccount(walletAddress.toString())
+          ),
         ttl
       );
 
@@ -658,10 +786,12 @@ class KTON extends EventTarget {
     const account = await this.cache.get(
       `contract-account-${this.tokenType}`,
       () =>
-        this.client!.accounts.getAccount(
-          this.isTestnet
-            ? CONTRACT.STAKING_CONTRACT_ADDRESS_TESTNET
-            : CONTRACT.STAKING_CONTRACT_ADDRESS
+        this.rateLimit(() =>
+          this.client!.accounts.getAccount(
+            this.isTestnet
+              ? CONTRACT.STAKING_CONTRACT_ADDRESS_TESTNET
+              : CONTRACT.STAKING_CONTRACT_ADDRESS
+          )
         ),
       ttl
     );
@@ -795,8 +925,9 @@ class KTON extends EventTarget {
     endDate: number
   ): Promise<NftItemWithEstimates[]> {
     try {
-      const payoutNftCollection =
-        await this.client.nft.getItemsFromCollection(payoutAddress);
+      const payoutNftCollection = await this.rateLimit(() =>
+        this.client.nft.getItemsFromCollection(payoutAddress)
+      );
       const endDateInSeconds = Math.floor(endDate / 1000);
       const filteredItems: NftItemWithEstimates[] = [];
       let itemsBeforeCount = 0;
@@ -869,12 +1000,13 @@ class KTON extends EventTarget {
         throw new Error("No jetton minter address found in pool info");
       }
 
-      const responseJetton =
-        await this.client.blockchain.execGetMethodForBlockchainAccount(
+      const responseJetton = await this.rateLimit(() =>
+        this.client.blockchain.execGetMethodForBlockchainAccount(
           jettonMinterAddress.toString(),
           "get_wallet_address",
           { args: [walletAddress.toString()] }
-        );
+        )
+      );
 
       if (!responseJetton?.decoded?.jetton_wallet_address) {
         throw new Error("Invalid response when getting jetton wallet address");
