@@ -385,7 +385,11 @@ class KTON extends EventTarget {
     };
 
     try {
-      return await this.cache.get(`stakingHistory-${this.tokenType}`, getHistoricalApyData, ttl);
+      return await this.cache.get(
+        `stakingHistory-${this.tokenType}`,
+        getHistoricalApyData,
+        ttl
+      );
     } catch {
       console.error("Failed to get historical APY");
       throw new Error("Could not retrieve historical APY.");
