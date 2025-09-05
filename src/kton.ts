@@ -890,7 +890,7 @@ class KTON extends EventTarget {
           `payouts-${payouts.deposit_payout}`,
           () =>
             this.getFilteredByAddressNFTs(
-              payouts.withdrawal_payout,
+              payouts.deposit_payout,
               Number(payouts.cycle_end)
             ),
           ttl
@@ -941,11 +941,14 @@ class KTON extends EventTarget {
             positionBasedTime +
             TIMING.ESTIMATED_TIME_AFTER_ROUND_S;
 
+          const match = item.metadata.name?.match(/[\d.]+/);
+          const amount = match && match[0] ? Number(match[0]) * 1e9 : 0;
+
           filteredItems.push({
             ...item,
             estimatedPayoutDateTime: estimatedPayoutTimeInSeconds,
             roundEndTime: endDateInSeconds,
-            KTONAmount: Number(item.metadata.name?.match(/[\d.]+/)[0]) || 0,
+            KTONAmount: amount,
           });
         }
         itemsBeforeCount++;
