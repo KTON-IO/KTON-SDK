@@ -348,9 +348,10 @@
             withdrawalDiv.style.border = "1px solid #ddd";
             withdrawalDiv.style.borderRadius = "4px";
             
+            const typeLabel = withdrawal.type === 'deposit' ? 'Deposit' : 'Withdrawal';
             const withdrawalInfo = `
               <div style="margin-bottom: 8px;">
-                <strong>Withdrawal: ${withdrawal.KTONAmount ? (withdrawal.KTONAmount / 1e9).toFixed(4) : '0'} ${kton.getTokenType()}</strong>
+                <strong>${typeLabel}: ${withdrawal.KTONAmount ? (withdrawal.KTONAmount / 1e9).toFixed(4) : '0'} ${kton.getTokenType()}</strong>
               </div>
               <div style="margin-bottom: 4px;">
                 <span>Estimated Payout: <strong>${estimatedTime}</strong></span>
