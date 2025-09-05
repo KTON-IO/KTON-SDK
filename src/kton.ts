@@ -65,7 +65,7 @@ interface NftItemWithEstimates extends NftItem {
   estimatedPayoutDateTime: number;
   roundEndTime: number;
   KTONAmount: number;
-  type: 'deposit' | 'withdrawal';
+  type: "deposit" | "withdrawal";
 }
 
 export interface PayoutData {
@@ -893,7 +893,7 @@ class KTON extends EventTarget {
             this.getFilteredByAddressNFTs(
               payouts.deposit_payout,
               Number(payouts.cycle_end),
-              'deposit'
+              "deposit"
             ),
           ttl
         );
@@ -906,7 +906,7 @@ class KTON extends EventTarget {
             this.getFilteredByAddressNFTs(
               payouts.withdrawal_payout,
               Number(payouts.cycle_end),
-              'withdrawal'
+              "withdrawal"
             ),
           ttl
         );
@@ -926,7 +926,7 @@ class KTON extends EventTarget {
   private async getFilteredByAddressNFTs(
     payoutAddress: string,
     endDate: number,
-    type: 'deposit' | 'withdrawal'
+    type: "deposit" | "withdrawal"
   ): Promise<NftItemWithEstimates[]> {
     try {
       const payoutNftCollection = await this.rateLimit(() =>
@@ -953,7 +953,7 @@ class KTON extends EventTarget {
             estimatedPayoutDateTime: estimatedPayoutTimeInSeconds,
             roundEndTime: endDateInSeconds,
             KTONAmount: amount,
-            type: type,
+            type,
           });
         }
         itemsBeforeCount++;
