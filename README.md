@@ -30,7 +30,7 @@
 
 KTON SDK is a comprehensive TypeScript/JavaScript library for seamless integration with TON blockchain's liquid staking ecosystem. **Now supporting both KTON and pKTON protocols** with a unified API interface, making it easy to build applications that work with multiple staking protocols.
 
-### 🆕 What's New in v1.1.0
+### 🆕 What's New in v1.1.2
 
 - **🔄 Dual Protocol Support**: Full KTON and pKTON compatibility
 - **🔀 Dynamic Token Switching**: Switch between protocols at runtime  
@@ -319,7 +319,7 @@ Check out these example implementations:
 
 ## 🔄 Migration Guide
 
-### From v1.0.x to v1.1.0
+### From v1.0.x to v1.1.2
 
 **✅ Zero Breaking Changes**: Your existing code will continue to work exactly as before.
 
@@ -414,7 +414,7 @@ npm publish
 <script src="https://unpkg.com/kton-sdk@latest/dist/kton-sdk.min.js"></script>
 
 <!-- Specific version -->
-<script src="https://unpkg.com/kton-sdk@1.1.0/dist/kton-sdk.min.js"></script>
+<script src="https://unpkg.com/kton-sdk@1.1.2/dist/kton-sdk.min.js"></script>
 ```
 
 ## 🤝 Contributing

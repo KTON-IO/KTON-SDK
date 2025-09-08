@@ -270,8 +270,8 @@ By contributing to KTON SDK, you agree that your contributions will be licensed 
 
 Feel free to:
 - Open a [GitHub Discussion](https://github.com/KTON-IO/KTON-SDK/discussions)
-- Join our [Telegram channel](https://t.me/kton_sdk)
-- Email us at dev@kton.io
+- Join the [TON Community](https://t.me/tondev_eng)
+- Create a [GitHub Discussion](https://github.com/KTON-IO/KTON-SDK/discussions)
 
 ## 🙏 Recognition
 
