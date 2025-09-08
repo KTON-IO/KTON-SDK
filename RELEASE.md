@@ -10,10 +10,11 @@ KTON SDK follows [Semantic Versioning](https://semver.org/):
 - **MINOR** version (0.X.0): New functionality in a backward-compatible manner
 - **PATCH** version (0.0.X): Backward-compatible bug fixes
 
-### Current Version: 1.1.0
+### Current Version: 1.1.2
 
 #### Recent Major Releases
 
+- **v1.1.2** - Maintenance release with stability improvements
 - **v1.1.0** - Added pKTON LST support with dual protocol functionality
 - **v1.0.0** - Initial stable release with KTON support
 
@@ -32,19 +33,19 @@ This project uses GitHub Actions for automated releases, including:
 
 ### Method 1: Using npm scripts (Recommended)
 
-#### Patch Release (Bug fixes: 1.1.0 → 1.1.1)
+#### Patch Release (Bug fixes: 1.1.2 → 1.1.3)
 ```bash
 npm run release:patch
 npm run release:push
 ```
 
-#### Minor Release (New features: 1.1.0 → 1.2.0)
+#### Minor Release (New features: 1.1.2 → 1.2.0)
 ```bash
 npm run release:minor
 npm run release:push
 ```
 
-#### Major Release (Breaking changes: 1.1.0 → 2.0.0)
+#### Major Release (Breaking changes: 1.1.2 → 2.0.0)
 ```bash
 npm run release:major
 npm run release:push
@@ -147,7 +148,7 @@ Pre-release versions will:
 
 ## Release Process Overview
 
-When you push a version tag (like `v1.1.0`) to GitHub, the following automated process triggers:
+When you push a version tag (like `v1.1.2`) to GitHub, the following automated process triggers:
 
 ```mermaid
 graph TD
@@ -210,7 +211,7 @@ Ensure your GitHub repository has these secrets configured:
 
 | Version | Status | Support End | Notes |
 |---------|--------|-------------|--------|
-| 1.1.x | ✅ Active | TBD | Current stable with pKTON support |
+| 1.1.x | ✅ Active | TBD | Current stable with pKTON support (v1.1.2) |
 | 1.0.x | ⚠️ Maintenance | 2025-12-31 | Security fixes only |
 
 ### Version Rollback
@@ -219,7 +220,7 @@ If you need to rollback a release:
 
 1. **Unpublish from NPM** (within 72 hours):
    ```bash
-   npm unpublish kton-sdk@1.1.0 --force
+   npm unpublish kton-sdk@1.1.2 --force
    ```
 
 2. **Delete GitHub Release**:
@@ -228,8 +229,8 @@ If you need to rollback a release:
 
 3. **Delete git tag**:
    ```bash
-   git tag -d v1.1.0
-   git push origin :refs/tags/v1.1.0
+   git tag -d v1.1.2
+   git push origin :refs/tags/v1.1.2
    ```
 
 4. **Communicate the rollback**:
