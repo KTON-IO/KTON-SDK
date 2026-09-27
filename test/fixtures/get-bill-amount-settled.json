@@ -1,0 +1,10 @@
+{
+ "gas_used": 0,
+ "exit_code": -13,
+ "stack": [
+  {
+   "type": "num",
+   "value": "0x179c1"
+  }
+ ]
+}

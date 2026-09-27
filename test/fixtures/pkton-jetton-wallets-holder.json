@@ -1,0 +1,74 @@
+{
+ "jetton_wallets": [
+  {
+   "address": "0:054FE69C749BFB5C630B73CB1560898C5F68860053446C651E04E9748D4EB9F0",
+   "balance": "9999998668",
+   "owner": "0:098CF77858A7CDF81ED6B3C50D28CC2EFAA9FC2FE02A82718CA432034B9CA2B1",
+   "jetton": "0:AD0FEABCBC8B5261F7DD3B7A76DFE81C9C5A4F229706C7DB44D48990DDFDED85",
+   "last_transaction_lt": "61949375000019",
+   "code_hash": "Er67DcjiArfib3IeJUfha7nrrsk09lfRnyLnbWK+yHg=",
+   "data_hash": "9ZWhoyuSPowvqdRoiUx95cE+f8jV6bJ/AFfV4pkvPoA="
+  }
+ ],
+ "address_book": {
+  "0:054FE69C749BFB5C630B73CB1560898C5F68860053446C651E04E9748D4EB9F0": {
+   "user_friendly": "EQAFT-acdJv7XGMLc8sVYImMX2iGAFNEbGUeBOl0jU658DSp",
+   "domain": null,
+   "interfaces": [
+    "jetton_wallet"
+   ]
+  },
+  "0:098CF77858A7CDF81ED6B3C50D28CC2EFAA9FC2FE02A82718CA432034B9CA2B1": {
+   "user_friendly": "EQAJjPd4WKfN-B7Ws8UNKMwu-qn8L-AqgnGMpDIDS5yiscxZ",
+   "domain": null,
+   "interfaces": [
+    "wallet_vesting"
+   ]
+  },
+  "0:AD0FEABCBC8B5261F7DD3B7A76DFE81C9C5A4F229706C7DB44D48990DDFDED85": {
+   "user_friendly": "EQCtD-q8vItSYffdO3p23-gcnFpPIpcGx9tE1ImQ3f3thV4l",
+   "domain": null,
+   "interfaces": [
+    "jetton_master"
+   ]
+  }
+ },
+ "metadata": {
+  "0:054FE69C749BFB5C630B73CB1560898C5F68860053446C651E04E9748D4EB9F0": {
+   "is_indexed": true,
+   "token_info": [
+    {
+     "valid": true,
+     "type": "jetton_wallets",
+     "extra": {
+      "balance": "9999998668",
+      "jetton": "0:AD0FEABCBC8B5261F7DD3B7A76DFE81C9C5A4F229706C7DB44D48990DDFDED85",
+      "owner": "0:098CF77858A7CDF81ED6B3C50D28CC2EFAA9FC2FE02A82718CA432034B9CA2B1"
+     }
+    }
+   ]
+  },
+  "0:AD0FEABCBC8B5261F7DD3B7A76DFE81C9C5A4F229706C7DB44D48990DDFDED85": {
+   "is_indexed": true,
+   "token_info": [
+    {
+     "valid": true,
+     "type": "jetton_masters",
+     "name": "pKTON",
+     "symbol": "pKTON",
+     "description": "pKTON, The Premium version of Liquid Staking Token on TON.",
+     "image": "https://app.kton.io/logo-256x256.png",
+     "is_nsfw": false,
+     "is_scam": false,
+     "extra": {
+      "_image_big": "https://proxy.toncenter.com/k5WAadaoUTypKDU7Ub8FcdnmU-0-nALMG4Ca_AEtu40/pr:big/bG9jYWw6Ly8vODcvZjgvODdmODM2NzY0OTgxYTQxNzk0ZWEwMDlkMTZjZGJlZGFiMjNlZjZlMGE1ODMxZWU1NzcxZjUxZGEwZWY4OGQwMw",
+      "_image_medium": "https://proxy.toncenter.com/0NQMJ0DpWOtcWDf_zZ6koOwAMrwvsq7fpPbfIs9Q1x4/pr:medium/bG9jYWw6Ly8vODcvZjgvODdmODM2NzY0OTgxYTQxNzk0ZWEwMDlkMTZjZGJlZGFiMjNlZjZlMGE1ODMxZWU1NzcxZjUxZGEwZWY4OGQwMw",
+      "_image_small": "https://proxy.toncenter.com/67JiHaAyJ2k1q_ABwenHAsjdXxcN8sOXWlRYEJjznh8/pr:small/bG9jYWw6Ly8vODcvZjgvODdmODM2NzY0OTgxYTQxNzk0ZWEwMDlkMTZjZGJlZGFiMjNlZjZlMGE1ODMxZWU1NzcxZjUxZGEwZWY4OGQwMw",
+      "decimals": 9,
+      "uri": "https://app.kton.io/premium-1-jetton-metadata.json"
+     }
+    }
+   ]
+  }
+ }
+}

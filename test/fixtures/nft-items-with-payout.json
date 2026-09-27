@@ -1,0 +1,274 @@
+{
+ "nft_items": [
+  {
+   "address": "0:71301C5480B32D8D8C1D736902B7F8F02B4115A75DCFB3F3AF8F183BE728DEBC",
+   "init": true,
+   "index": "1",
+   "collection_address": "0:A4B50575D1043FBA451F9F39E90DF1ED1F6E0B0BD19DA1F98155466023DB97A5",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "description": "DO NOT SEND ON CONTRACTS: Converts burned Pool Jettons to TON when ready",
+    "image": "my-custom-stake-address.ton/icon.img",
+    "name": "Bill for 1.000000000 Pool Jetton in Withdrawal Payout#663",
+    "render_type": "hidden",
+    "symbol": "\u23f2\ufe0f",
+    "uri": "my-custom-stake-address.ton"
+   },
+   "last_transaction_lt": "104675908000562",
+   "code_hash": "ghGpwR+bboi7IVe1FqshdCFOKdgBRbGSAeRRZF2AmlA=",
+   "data_hash": "MRNFeTReuuV4bLxFgsAYXuJFsQRMQhttXWuD29LeLPs=",
+   "collection": {
+    "address": "0:A4B50575D1043FBA451F9F39E90DF1ED1F6E0B0BD19DA1F98155466023DB97A5",
+    "owner_address": "0:3D1F01190FFB4E35F573EA5252D0F54A479BE2122106CA3F40B907B01905675C",
+    "last_transaction_lt": "104675908000560",
+    "next_item_index": "2",
+    "collection_content": {
+     "description": "Converts burned Pool Jettons to TON",
+     "image": "my-custom-stake-address.ton/icon.img",
+     "name": "Withdrawal Payout#663",
+     "render_type": "hidden",
+     "symbol": "\u23f2\ufe0f",
+     "uri": "my-custom-stake-address.ton"
+    },
+    "data_hash": "N/89Q/ZP/oeAJpqyxxRS0a3Xu62+rT073DG7psnnCo4=",
+    "code_hash": "GOUOu27v7E88jalVWhQyLkmLsh0BMGgS0BY8jShxfu4="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:71D33119D01CE546244F4B20FE9D00A961D8F6A783F8F76EEA1058AB99E62A62",
+   "init": true,
+   "index": "33667498684377672720213446617708161826601079263038517587895873003973494009933",
+   "collection_address": "0:02710A51D9F99D784356744D98190587571493C80F19AB8FE4EEB93F21AC4245",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://nft.fragment.com/gift/vintagecigar-6212.json"
+   },
+   "last_transaction_lt": "62319638000005",
+   "code_hash": "MNzX1bb89ZaMJ5Hh4xrXMvJnLymG4daXDrA8yiLSMlE=",
+   "data_hash": "Pe2ljFM1r1bCFSBKEmVn3kKYt7ih/ckpA3s8wck8eyI=",
+   "collection": {
+    "address": "0:02710A51D9F99D784356744D98190587571493C80F19AB8FE4EEB93F21AC4245",
+    "owner_address": null,
+    "last_transaction_lt": "104710737000005",
+    "next_item_index": "-1",
+    "collection_content": {
+     "uri": "https://nft.fragment.com/collection/vintagecigar.json"
+    },
+    "data_hash": "3BnedtKy6ZMIj5+NwxH66Kzc7JO6HezsASNYAOxLayk=",
+    "code_hash": "iEEMIg+CIYFmgmnOg+ucwNOznCGZnItV3gM2CiDnwoI="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:AB76705C30AF078B5DDE68D5008F63A30573D5085C30EEBDD20C12BDA0375FA9",
+   "init": true,
+   "index": "4604",
+   "collection_address": "0:0BCA63E6D5BEE97899BCC5633BBCA722D6AF73C45B2A4CFCDE640422C55D05A7",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://notc.app/json/item67.json"
+   },
+   "last_transaction_lt": "46598193000001",
+   "code_hash": "C3Uhz+S3YZdz/IKDMqiFpMKWPYqPDKoQw9VB5LnJkQU=",
+   "data_hash": "LnjFPLPtCjZmq9hbqlC7MktggpDQEuMMv+/kqhu6XTI=",
+   "collection": {
+    "address": "0:0BCA63E6D5BEE97899BCC5633BBCA722D6AF73C45B2A4CFCDE640422C55D05A7",
+    "owner_address": "0:C0552DDB12A31F8E2FC854B33F5F8852035AF5490B0966A9AAD3C38116DFAF54",
+    "last_transaction_lt": "46672010000001",
+    "next_item_index": "26928",
+    "collection_content": {
+     "uri": "https://notc.app/json/collection.json"
+    },
+    "data_hash": "QAsW2ZoJCpLqUssDZgkq2lr/gk/aWqvIVoGIeO+6XVM=",
+    "code_hash": "7g+hn2n1JIeJmc4oauO/ST8ptNDvfimEF260KI1iI94="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:D2591ED58EF7C81A73561024FA05A98BCA6BA3C23A1C41CCCE705E0D647D3383",
+   "init": true,
+   "index": "1005",
+   "collection_address": "0:0F7B000B04454ABE203B66FC37BBDC427148C23C975A697585E958B02DF550A0",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://stondrop.com/json/item1005.json"
+   },
+   "last_transaction_lt": "46440792000001",
+   "code_hash": "C3Uhz+S3YZdz/IKDMqiFpMKWPYqPDKoQw9VB5LnJkQU=",
+   "data_hash": "3BLWBllhTH2Xnzf5JsQvb4GxXtNXCetft7BDU8Z7FpU=",
+   "collection": {
+    "address": "0:0F7B000B04454ABE203B66FC37BBDC427148C23C975A697585E958B02DF550A0",
+    "owner_address": "0:2F32F344604EAA0D63E158E2B6D9B3AFE29D5A356CE640714A71F279DAAB9B10",
+    "last_transaction_lt": "46441316000003",
+    "next_item_index": "2001",
+    "collection_content": {
+     "uri": "https://stondrop.com/json/collection.json"
+    },
+    "data_hash": "Qvd2LQH1G33q4QmOs7fJpzS9HYXbi9SAVFfkCDky5Dw=",
+    "code_hash": "xpXxTKoh3pZ/Yz2ou662c6JO2JCSAYP4jZr8ZBjGKKQ="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:0B601A95DACA2E88A1A4E71D77426F90B9244BFEB5DC0039D14D9E9FB9FD1240",
+   "init": true,
+   "index": "1576",
+   "collection_address": "0:1B387682D52A4F8412B3F28628E14A96994018F45B0EDA1E17D0E5A5F4CCC6A2",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://durevton.com/hello/hello.json"
+   },
+   "last_transaction_lt": "46316372000006",
+   "code_hash": "IiRK2NdJ1ZANXc3Otzu+PwJffUydqK5Kgi7kz6mSKgM=",
+   "data_hash": "EKppBsdsoQpUphHE1UERg4MiO31cDxhEyQNnZwrR6uc=",
+   "collection": {
+    "address": "0:1B387682D52A4F8412B3F28628E14A96994018F45B0EDA1E17D0E5A5F4CCC6A2",
+    "owner_address": "0:1588A8ECBDBA678AABB1C8D01AD7609A987DBA85935C16710E86371931AC919A",
+    "last_transaction_lt": "46314532000003",
+    "next_item_index": "1650",
+    "collection_content": {
+     "uri": "https://durevton.com/hello/hello.json"
+    },
+    "data_hash": "2RI2KXApFpwHg7MQ1gINsipURt8hiZSMfcP5l/4bLbo=",
+    "code_hash": "iD1ejv0f3z3bHpa6/arbayoMvrSeJXkhPaSb7fx5o5Y="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:3C4A212B1C63201444FC48EEED2237E3FE3C28EB45145E6B01F19709D9EBB7EE",
+   "init": true,
+   "index": "399",
+   "collection_address": "0:1B5B2E8F94B4F00D9EDA95DC21CC836E9B16A9B19539EDF11A8E39C9AFA439E8",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://www.curvesocial.link/main-fragment.json"
+   },
+   "last_transaction_lt": "46388727000002",
+   "code_hash": "5nxwgWEExrRUTUXsW6lBQ+Q+m6ZHDlqXUKAAHx6aZ74=",
+   "data_hash": "iT1zqKHLsMmOERuP3c8KLDXsccvzFQUDzDi+lcxkVgc=",
+   "collection": {
+    "address": "0:1B5B2E8F94B4F00D9EDA95DC21CC836E9B16A9B19539EDF11A8E39C9AFA439E8",
+    "owner_address": "0:E2EEBC67B2E801E9E8A736FC959AEDB3B300B86A01BF9141F44F6217C12124AD",
+    "last_transaction_lt": "46669405000001",
+    "next_item_index": "11600",
+    "collection_content": {
+     "uri": "https://curvesocial.link/collection-fragment.json"
+    },
+    "data_hash": "qM9a6G/e652i1TI4BX5A0Q3UlEBy21HH+iUiXx/P2gg=",
+    "code_hash": "LFB8sQZchxSYykPEDOtMSpAleHe17dcm2HUm0kATEXg="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:E09CBE347DFEAC39989C054EBB57BE8756BCE23D62AA647000139444D41A86C1",
+   "init": true,
+   "index": "888",
+   "collection_address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://id-api.tonx.studio/public/collection/888.json"
+   },
+   "last_transaction_lt": "49881018000001",
+   "code_hash": "L/v1K+r4FhV7/Jcm3CVIMn+ofr/SaW7tJ6nCzaJcntw=",
+   "data_hash": "Zr4htst+FxI48X9EkLAxWRurWwuF6he0MDrl0fwXYws=",
+   "collection": {
+    "address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+    "owner_address": "0:65CD67E0B3234A46E09BEDA6F8062274DB4FDEAFC6954CC7C431AC74C482A2BF",
+    "last_transaction_lt": "64005766000007",
+    "next_item_index": "56563",
+    "collection_content": {
+     "uri": "https://id-api.tonx.studio/public/meta/collection.json"
+    },
+    "data_hash": "Y+08eyfLn21+VkQ6bzbDynRssMhqSVrHSShHvlib8+k=",
+    "code_hash": "C4RJfM7+KX0AvuuwilRMxu9iMOq3YmksoFP6mBE5mDY="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:C9DFD0DBA02B77FFA2E58BE37C5482B4E296C31A1105E1E1268BADD8EB7B1D0A",
+   "init": true,
+   "index": "10284",
+   "collection_address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://id-api.tonx.studio/public/collection/10284.json"
+   },
+   "last_transaction_lt": "49881018000001",
+   "code_hash": "L/v1K+r4FhV7/Jcm3CVIMn+ofr/SaW7tJ6nCzaJcntw=",
+   "data_hash": "xgPe/fj1zotFl3opuNwgmzBnnaH6giKZMETKlJmEC8A=",
+   "collection": {
+    "address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+    "owner_address": "0:65CD67E0B3234A46E09BEDA6F8062274DB4FDEAFC6954CC7C431AC74C482A2BF",
+    "last_transaction_lt": "64005766000007",
+    "next_item_index": "56563",
+    "collection_content": {
+     "uri": "https://id-api.tonx.studio/public/meta/collection.json"
+    },
+    "data_hash": "Y+08eyfLn21+VkQ6bzbDynRssMhqSVrHSShHvlib8+k=",
+    "code_hash": "C4RJfM7+KX0AvuuwilRMxu9iMOq3YmksoFP6mBE5mDY="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:7010990AD19656C29CA9C31897DC2F3B6FAF4493E03A4600D9C9E6015B1263D3",
+   "init": true,
+   "index": "41278",
+   "collection_address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://id-api.tonx.studio/public/collection/41278.json"
+   },
+   "last_transaction_lt": "49881017000001",
+   "code_hash": "L/v1K+r4FhV7/Jcm3CVIMn+ofr/SaW7tJ6nCzaJcntw=",
+   "data_hash": "AOLNApPfwDem3d8VX0u8kB0QJfBArIMyr0gKTQsYZuY=",
+   "collection": {
+    "address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+    "owner_address": "0:65CD67E0B3234A46E09BEDA6F8062274DB4FDEAFC6954CC7C431AC74C482A2BF",
+    "last_transaction_lt": "64005766000007",
+    "next_item_index": "56563",
+    "collection_content": {
+     "uri": "https://id-api.tonx.studio/public/meta/collection.json"
+    },
+    "data_hash": "Y+08eyfLn21+VkQ6bzbDynRssMhqSVrHSShHvlib8+k=",
+    "code_hash": "C4RJfM7+KX0AvuuwilRMxu9iMOq3YmksoFP6mBE5mDY="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  },
+  {
+   "address": "0:55CA3882114F1691BA424CBAE76DCBD5ADFFF695FC9676D27A62A72DC0526364",
+   "init": true,
+   "index": "56060",
+   "collection_address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+   "owner_address": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E",
+   "content": {
+    "uri": "https://id-api.tonx.studio/public/collection/56060.json"
+   },
+   "last_transaction_lt": "49961287000001",
+   "code_hash": "L/v1K+r4FhV7/Jcm3CVIMn+ofr/SaW7tJ6nCzaJcntw=",
+   "data_hash": "nQxabhmlbef4h4Zh67SC2XDdQikwOBQ1Qni4vBIvHHY=",
+   "collection": {
+    "address": "0:1CE2372986701E2D0FF0992EDEE25796821172B1123F54A5024748E18950D7F6",
+    "owner_address": "0:65CD67E0B3234A46E09BEDA6F8062274DB4FDEAFC6954CC7C431AC74C482A2BF",
+    "last_transaction_lt": "64005766000007",
+    "next_item_index": "56563",
+    "collection_content": {
+     "uri": "https://id-api.tonx.studio/public/meta/collection.json"
+    },
+    "data_hash": "Y+08eyfLn21+VkQ6bzbDynRssMhqSVrHSShHvlib8+k=",
+    "code_hash": "C4RJfM7+KX0AvuuwilRMxu9iMOq3YmksoFP6mBE5mDY="
+   },
+   "on_sale": false,
+   "real_owner": "0:2918C2D787BD5136A3AF89A4A851FAC843D922929D17422C4E2437D8BA255B5E"
+  }
+ ]
+}

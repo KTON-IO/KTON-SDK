@@ -1,427 +1,195 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KTON/pKTON SDK Demo</title> 
-    <script src="./dist/kton-sdk.min.js"></script>
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
-  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KTON SDK demo</title>
+  <link rel="icon" href="icon.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@3.0.2/dist/tonconnect-ui.min.js"></script>
+  <script src="kton-sdk.global.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7fa; --card: #ffffff; --text: #16202c; --muted: #5b6b7d;
+      --line: #dde3ea; --accent: #0a84d6; --accent-text: #ffffff; --error: #c62828;
+      color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f151c; --card: #17202a; --text: #e6edf4; --muted: #92a1b1;
+        --line: #26323f; --accent: #3aa3ec; --accent-text: #06111b; --error: #ef7a7a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main { max-width: 640px; margin: 0 auto; padding: 24px 16px 48px; display: grid; gap: 16px; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    h1 { font-size: 20px; margin: 0; }
+    h2 { font-size: 13px; margin: 0 0 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
+    dt { color: var(--muted); }
+    dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    select, input, button { font: inherit; border-radius: 8px; border: 1px solid var(--line); padding: 8px 12px; background: var(--bg); color: var(--text); }
+    input { flex: 1 1 140px; min-width: 0; }
+    button { background: var(--accent); color: var(--accent-text); border: 0; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: default; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    #status { color: var(--muted); min-height: 1.5em; margin: 12px 0 0; overflow-wrap: anywhere; }
+    #status.error { color: var(--error); }
+    ul { margin: 0; padding-left: 18px; }
+    footer { color: var(--muted); font-size: 13px; }
+    a { color: var(--accent); }
+  </style>
 </head>
-
 <body>
-  <h1>KTON/pKTON SDK Demo</h1>
-  
-  <!-- Token Type Selection -->
-  <div style="margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #f9f9f9;">
-    <h3>Token Type Selection</h3>
-    <label>
-      <input type="radio" name="tokenType" value="KTON" checked> KTON
-    </label>
-    <label style="margin-left: 20px;">
-      <input type="radio" name="tokenType" value="pKTON"> pKTON
-    </label>
-    <br>
-    <small>Current: <span id="currentTokenType">KTON</span></small>
-  </div>
+<main>
+  <header>
+    <h1>KTON SDK demo</h1>
+    <div id="connect"></div>
+  </header>
 
-  <button id="connectWallet">Connect Wallet</button>
-  <button id="disconnectWallet" style="display: none">
-    Disconnect Wallet
-  </button>
-  <button id="stake">Stake 1 TON</button>
-  <button id="stakeMax">Stake MAX</button>
-  <button id="unstake">Unstake 1 <span class="token-name">KTON</span></button>
-  <button id="unstakeInstant">Unstake 1 <span class="token-name">KTON</span> Instant</button>
-  <button id="unstakeBestRate">Unstake 1 <span class="token-name">KTON</span> Best Rate</button>
-  <button id="refreshBalances">Refresh Balances</button>
-  <button id="getRounds">Get Rounds info</button>
-  <button id="getPayouts">Get Depost/Withdrawal Receipts</button>
-  <button id="getPoolData">Get Pool Data</button>
-  <br /><br />
-  <div id="walletAddressDisplay">
-    Wallet Address: <span id="walletAddress"></span>
-  </div>
-  <div id="balanceDisplay">Balance TON: <span id="balance"></span></div>
-  <div id="availableBalanceDisplay">
-    Available to stake: <span id="availableBalance"></span>
-  </div>
-  <div id="stakedBalanceDisplay">
-    Staked TON (<span class="token-name">KTON</span>): <span id="stakedBalance"></span>
-  </div>
-  <div id="apyDisplay">APY: <span id="apy"></span></div>
-  <div id="tvlDisplay">TVL: <span id="tvl"></span></div>
-  <div id="holdersDisplay"><span class="token-name">KTON</span> Holders: <span id="holders"></span></div>
-  <div id="roundsDisplay">Rounds: <span id="rounds"></span></div>
-  <div id="TONUSDRateDisplay">1 TON = <span id="TONUSD">0</span>$</div>
-  <div id="TONKTONRateDisplay">
-    1 <span class="token-name">KTON</span> = <span id="KTONTON">0</span> TON
-  </div>
-  <div id="activeWithdrawals"></div>
-  <br /><br />
-  <code id="poolDataDisplay"></code>
+  <section>
+    <h2>Pool</h2>
+    <div class="row" style="margin-bottom:12px">
+      <select id="pool" aria-label="Pool">
+        <option value="KTON">KTON</option>
+        <option value="pKTON">pKTON</option>
+      </select>
+    </div>
+    <dl id="pool-data"><dt>Loading</dt><dd></dd></dl>
+  </section>
 
-  <script>
-    const connector = new TonConnectSDK.TonConnect({
-      manifestUrl: "https://gist.githubusercontent.com/RainBoltz/f55db40402cc474a6aec49926c2e548a/raw/6f6902b79f7c7605a391328377d42bddcbdf230e/kton-demo-dapp-tonconnect-manifest.json",
-    });
-    const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ connector });
+  <section>
+    <h2>Your wallet</h2>
+    <dl id="wallet-data"><dt>Not connected</dt><dd></dd></dl>
+  </section>
 
-    const { KTON } = KTONSDK;
-    const kton = new KTON({
-      connector,
-      partnerCode: 888888,
-      isTestnet: new URLSearchParams(window.location.search).get("testnet") !== null,
-    });
+  <section>
+    <h2>Stake and unstake</h2>
+    <div class="row">
+      <input id="amount" inputmode="decimal" placeholder="Amount" aria-label="Amount">
+      <button id="stake" type="button" disabled>Stake TON</button>
+      <button id="unstake" type="button" disabled>Unstake KTON</button>
+    </div>
+    <p id="status" role="status"></p>
+  </section>
 
-    // Token type switching functionality
-    function updateTokenDisplay(tokenType) {
-      document.getElementById("currentTokenType").innerText = tokenType;
-      const tokenNameElements = document.querySelectorAll(".token-name");
-      tokenNameElements.forEach(element => {
-        element.innerText = tokenType;
+  <footer>
+    Unstaking here waits for the end of the round, at no fee.
+    <a href="https://github.com/KTON-IO/KTON-SDK">Source and docs</a>
+  </footer>
+</main>
+
+<script>
+  const { KTON, toNano, fromNano } = KTONSDK;
+  const $ = (id) => document.getElementById(id);
+  const ton = (nano) => Number(fromNano(nano)).toLocaleString("en-US", { maximumFractionDigits: 4 });
+
+  const tonConnect = new TON_CONNECT_UI.TonConnectUI({
+    manifestUrl: new URL("tonconnect-manifest.json", location.href).href,
+    buttonRootId: "connect",
+  });
+  let kton;
+
+  function rows(dl, entries) {
+    dl.replaceChildren(...entries.flatMap(([label, value]) => {
+      const dt = document.createElement("dt");
+      const dd = document.createElement("dd");
+      dt.textContent = label;
+      dd.textContent = value;
+      return [dt, dd];
+    }));
+  }
+
+  function status(text, isError = false) {
+    $("status").textContent = text;
+    $("status").className = isError ? "error" : "";
+  }
+
+  async function showPool() {
+    kton = new KTON({ pool: $("pool").value, connector: tonConnect });
+    const unit = $("pool").value;
+    $("unstake").textContent = `Unstake ${unit}`;
+    try {
+      const [pool, rates, round] = await Promise.all([
+        kton.getPoolData(), kton.getRates(), kton.getRoundInfo(),
+      ]);
+      const entries = [
+        ["Staked", `${ton(pool.totalBalance)} TON`],
+        [`1 ${unit}`, `${rates.current.toFixed(6)} TON`],
+        ["Realized APY", "Measuring"],
+        ["Governance fee", `${(pool.governanceFee * 100).toFixed(2)}%`],
+        ["Round ends", round.end.toLocaleString()],
+        ["Pool validating", round.poolValidating ? "Yes" : "No, resting this round"],
+        ["Deposits", pool.depositsOpen && !pool.halted ? "Open" : "Closed"],
+      ];
+      rows($("pool-data"), entries);
+      // The round logs take a few requests; the rest shows meanwhile.
+      const current = kton;
+      current.getRealizedApy().then((apy) => {
+        if (kton !== current) return;
+        entries[2][1] = apy ? `${(apy.apy * 100).toFixed(2)}% over ${apy.days.toFixed(0)} days` : "Not enough rounds";
+        rows($("pool-data"), entries);
+      }, () => {
+        entries[2][1] = "Could not measure";
+        rows($("pool-data"), entries);
       });
+    } catch (error) {
+      rows($("pool-data"), [["Could not read the pool", error.message]]);
     }
+    await showWallet();
+  }
 
-    // Handle token type radio button changes
-    document.querySelectorAll('input[name="tokenType"]').forEach(radio => {
-      radio.addEventListener('change', async (e) => {
-        const newTokenType = e.target.value;
-        try {
-          await kton.switchTokenType(newTokenType);
-          await kton.clearStorageData(); // Clear cache after switching
-          updateTokenDisplay(newTokenType);
-          
-          // Clear previous data and refresh
-          document.getElementById("stakedBalance").innerText = "";
-          document.getElementById("apy").innerText = "";
-          document.getElementById("tvl").innerText = "";
-          document.getElementById("holders").innerText = "";
-          document.getElementById("KTONTON").innerText = "";
-          
-          // Reload data for new token type
-          await loadTokenData();
-          
-          // Refresh balances if wallet is connected
-          if (kton.ready) {
-            await updateBalances();
-          }
-        } catch (error) {
-          console.error("Error switching token type:", error);
-          alert(`Error switching to ${newTokenType}: ${error.message}`);
-          // Revert radio selection
-          document.querySelector(`input[value="${kton.getTokenType()}"]`).checked = true;
-        }
-      });
-    });
-
-    // Listen for token type switches
-    kton.addEventListener("token_type_switched", () => {
-      console.log("Token type switched to:", kton.getTokenType());
-    });
-
-    // Function to load token-specific data
-    async function loadTokenData() {
-      try {
-        const apy = await kton.getCurrentApy(600000);
-        document.getElementById("apy").innerText = apy;
-
-        const tvl = await kton.getTvl(600000);
-        document.getElementById("tvl").innerText = tvl;
-
-        const holders = await kton.getHoldersCount(600000);
-        document.getElementById("holders").innerText = holders;
-
-        const { roundStart, roundEnd } = await kton.getRoundTimestamps(5000);
-        document.getElementById("rounds").innerText = `start ${roundStart}, end ${roundEnd}`;
-
-        const rates = await kton.getRates(600000);
-        document.getElementById("TONUSD").innerText = rates.TONUSD;
-        document.getElementById("KTONTON").innerText = rates.KTONTON;
-      } catch (error) {
-        console.error("Error fetching token data:", error);
-      }
+  async function showWallet() {
+    const connected = !!tonConnect.account;
+    $("stake").disabled = !connected;
+    $("unstake").disabled = !connected;
+    if (!connected) {
+      rows($("wallet-data"), [["Not connected", ""]]);
+      return;
     }
-
-    // Fetch and display data on page load
-    window.addEventListener("DOMContentLoaded", async () => {
-      await loadTokenData();
-    });
-
-    kton.addEventListener("initialized", async () => {
-      try {
-        await getStakedBalance();
-        await getAvailableBalance();
-      } catch (error) {
-        console.warn("Error getting initial balances:", error);
-      }
-    });
-
-    const unsubscribe = tonConnectUI.onStatusChange((wallet) => {
-      if (wallet?.account?.address) {
-        const address = wallet.account.address;
-
-        document.getElementById("walletAddress").innerText = address ? KTON.toReadableAddress(address) : "";
-        document.getElementById("connectWallet").style.display = "none";
-        document.getElementById("disconnectWallet").style.display = "inline";
-
-        getWalletBalance();
-      }
-    });
-
-    document
-      .getElementById("connectWallet")
-      .addEventListener("click", async () => {
-        await tonConnectUI.openModal();
-      });
-
-    document
-      .getElementById("disconnectWallet")
-      .addEventListener("click", async () => {
-        await kton.clearStorageUserData();
-        await tonConnectUI.disconnect();
-        document.getElementById("connectWallet").style.display = "inline";
-        document.getElementById("disconnectWallet").style.display = "none";
-        document.getElementById("walletAddress").innerText = "";
-        document.getElementById("balance").innerText = "";
-        document.getElementById("stakedBalance").innerText = "";
-        document.getElementById("availableBalance").innerText = "";
-      });
-
-    document.getElementById("stake").addEventListener("click", async () => {
-      if (!kton?.walletAddress) {
-        alert("Please connect your wallet first");
-        return;
-      }
-      try {
-        await kton.stake(1); // Stake 1 TON
-        alert("Stake transaction submitted successfully!");
-        await updateBalances();
-      } catch (error) {
-        console.error("Error staking:", error);
-        alert(`Error staking: ${error.message}`);
-      }
-    });
-
-    document
-      .getElementById("stakeMax")
-      .addEventListener("click", async () => {
-        if (!kton?.walletAddress) {
-          alert("Please connect your wallet first");
-          return;
-        }
-        try {
-          await kton.stakeMax();
-          alert("Max stake transaction submitted successfully!");
-          await updateBalances();
-        } catch (error) {
-          console.error("Error staking max:", error);
-          alert(`Error staking max: ${error.message}`);
-        }
-      });
-
-    document.getElementById("unstake").addEventListener("click", async () => {
-      if (!kton?.walletAddress) {
-        alert("Please connect your wallet first");
-        return;
-      }
-      try {
-        await kton.unstake(1); // Unstake 1 KTON
-        alert("Unstake transaction submitted successfully!");
-        await updateBalances();
-      } catch (error) {
-        console.error("Error unstaking:", error);
-        alert(`Error unstaking: ${error.message}`);
-      }
-    });
-
-    document
-      .getElementById("unstakeInstant")
-      .addEventListener("click", async () => {
-        if (!kton?.walletAddress) {
-          alert("Please connect your wallet first");
-          return;
-        }
-        try {
-          await kton.unstakeInstant(1); // Unstake 1 KTON instantly
-          alert("Instant unstake transaction submitted successfully!");
-          await updateBalances();
-        } catch (error) {
-          console.error("Error with instant unstake:", error);
-          alert(`Error with instant unstake: ${error.message}`);
-        }
-      });
-
-    document
-      .getElementById("unstakeBestRate")
-      .addEventListener("click", async () => {
-        if (!kton?.walletAddress) {
-          alert("Please connect your wallet first");
-          return;
-        }
-        try {
-          await kton.unstakeBestRate(1); // Unstake 1 KTON at best rate
-          alert("Best rate unstake transaction submitted successfully!");
-          await updateBalances();
-        } catch (error) {
-          console.error("Error with best rate unstake:", error);
-          alert(`Error with best rate unstake: ${error.message}`);
-        }
-      });
-
-    document
-      .getElementById("getPoolData")
-      .addEventListener("click", async () => {
-        const poolData = await kton.fetchStakingPoolInfo(5000);
-        document.getElementById("poolDataDisplay").innerText = JSON.stringify(
-          poolData,
-          null,
-          2
-        );
-      });
-
-    document
-      .getElementById("getRounds")
-      .addEventListener("click", async () => {
-        try {
-          const { roundStart, roundEnd } = await kton.getRoundTimestamps(5000);
-          document.getElementById("rounds").textContent = `Start: ${new Date(roundStart * 1000).toLocaleString()}, End: ${new Date(roundEnd * 1000).toLocaleString()}`;
-        } catch (error) {
-          console.error("Error getting round timestamps:", error);
-          alert(`Error getting round timestamps: ${error.message}`);
-        }
-      });
-
-    document
-      .getElementById("getPayouts")
-      .addEventListener("click", async () => {
-        if (!kton?.walletAddress) {
-          alert("Please connect your wallet first");
-          return;
-        }
-        
-        try {
-          const activeWithdrawalsDiv = document.getElementById("activeWithdrawals");
-          activeWithdrawalsDiv.innerHTML = "";
-          
-          // Show loading state
-          activeWithdrawalsDiv.innerHTML = "<p>Loading active withdrawals...</p>";
-          
-          const activeWithdrawals = await kton.getActiveWithdrawalNFTs(10000);
-          
-          if (!activeWithdrawals || !activeWithdrawals.length) {
-            activeWithdrawalsDiv.innerHTML = "<p>You have no active withdrawals</p>";
-            return;
-          }
-          
-          const formatTime = (seconds) => {
-            if (seconds <= 0) return "Ready";
-            const days = Math.floor(seconds / (3600 * 24));
-            const hours = Math.floor((seconds % (3600 * 24)) / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            
-            const parts = [];
-            if (days > 0) parts.push(`${days} day${days > 1 ? 's' : ''}`);
-            if (hours > 0) parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
-            if (minutes > 0 || parts.length === 0) parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
-            
-            return parts.join(', ');
-          };
-
-          activeWithdrawals.forEach((withdrawal) => {
-            const currentTime = Math.floor(Date.now() / 1000);
-            const estimatedTime = formatTime(
-              withdrawal.estimatedPayoutDateTime - currentTime
-            );
-            const roundEnds = formatTime(
-              withdrawal.roundEndTime - currentTime
-            );
-            const estimatedTimeInQueue = formatTime(
-              withdrawal.estimatedPayoutDateTime - withdrawal.roundEndTime
-            );
-            
-            const withdrawalDiv = document.createElement("div");
-            withdrawalDiv.classList.add("withdrawal-item");
-            withdrawalDiv.style.margin = "10px 0";
-            withdrawalDiv.style.padding = "10px";
-            withdrawalDiv.style.border = "1px solid #ddd";
-            withdrawalDiv.style.borderRadius = "4px";
-            
-            const typeLabel = withdrawal.type === 'deposit' ? 'Deposit' : 'Withdrawal';
-            const withdrawalInfo = `
-              <div style="margin-bottom: 8px;">
-                <strong>${typeLabel}: ${withdrawal.KTONAmount ? (withdrawal.KTONAmount / 1e9).toFixed(4) : '0'} ${kton.getTokenType()}</strong>
-              </div>
-              <div style="margin-bottom: 4px;">
-                <span>Estimated Payout: <strong>${estimatedTime}</strong></span>
-              </div>
-              <div style="margin-bottom: 4px;">
-                <span>Time in Queue: ${estimatedTimeInQueue}</span>
-              </div>
-              <div style="margin-bottom: 4px;">
-                <span>Round Ends: ${roundEnds}</span>
-              </div>
-              <div style="margin-top: 8px; font-size: 0.9em; color: #666;">
-                <div>NFT Address: ${withdrawal.address || 'N/A'}</div>
-                ${withdrawal.collection?.address ? `<div>Collection: ${withdrawal.collection.address}</div>` : ''}
-              </div>
-              <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
-            `;
-            
-            withdrawalDiv.innerHTML = withdrawalInfo;
-            activeWithdrawalsDiv.appendChild(withdrawalDiv);
-          });
-        } catch (error) {
-          console.error("Error fetching active withdrawals:", error);
-          const activeWithdrawalsDiv = document.getElementById("activeWithdrawals");
-          activeWithdrawalsDiv.innerHTML = `<p style="color: red;">Error loading withdrawals: ${error.message}</p>`;
-        }
-      });
-
-    async function getWalletBalance() {
-      const balance = await kton.getBalance(10000);
-      document.getElementById("balance").innerText = balance;
+    try {
+      const [balance, staked, withdrawals] = await Promise.all([
+        kton.getBalance(), kton.getStakedBalance(), kton.getWithdrawals(),
+      ]);
+      const pending = withdrawals.reduce((sum, w) => sum + w.amount, 0n);
+      rows($("wallet-data"), [
+        ["TON", ton(balance)],
+        [kton.pool, ton(staked)],
+        ["Waiting for payout", withdrawals.length ? `${ton(pending)} ${kton.pool} in ${withdrawals.length} request(s)` : "None"],
+      ]);
+    } catch (error) {
+      rows($("wallet-data"), [["Could not read the wallet", error.message]]);
     }
+  }
 
-    async function getStakedBalance() {
-      try {
-        const stakedBalance = await kton.getStakedBalance(10000);
-        document.getElementById("stakedBalance").innerText = stakedBalance;
-      } catch (error) {
-        console.warn("Error getting staked balance:", error);
-        document.getElementById("stakedBalance").innerText = "0";
-      }
+  async function send(action) {
+    let amount;
+    try {
+      amount = toNano($("amount").value.trim());
+    } catch {
+      amount = 0n;
     }
-
-    async function getAvailableBalance() {
-      const availableBalance = await kton.getAvailableBalance(10000);
-      document.getElementById("availableBalance").innerText = availableBalance;
+    if (amount <= 0n) return status("Enter an amount such as 1.5", true);
+    status("Confirm in your wallet");
+    try {
+      await (action === "stake" ? kton.stake(amount) : kton.unstake(amount));
+      status("Sent. Balances update once the transaction lands.");
+      setTimeout(showWallet, 20_000);
+    } catch (error) {
+      status(error.message, true);
     }
+  }
 
-    async function updateBalances() {
-      try {
-        await getWalletBalance();
-        await getStakedBalance();
-        await getAvailableBalance();
-      } catch (error) {
-        console.warn("Error updating balances:", error);
-      }
-    }
-
-    document
-      .getElementById("refreshBalances")
-      .addEventListener("click", async () => {
-        try {
-          await getWalletBalance();
-          await getStakedBalance();
-          await getAvailableBalance();
-          await loadTokenData(); // Refresh token-specific data too
-        } catch (error) {
-          console.warn("Error refreshing balances:", error);
-        }
-      });
-  </script>
+  $("stake").addEventListener("click", () => send("stake"));
+  $("unstake").addEventListener("click", () => send("unstake"));
+  $("pool").addEventListener("change", showPool);
+  tonConnect.onStatusChange(showWallet);
+  showPool();
+</script>
 </body>
-
 </html>

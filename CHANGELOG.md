@@ -5,6 +5,53 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-28
+
+A rewrite. See "Upgrading from 1.x" in the README.
+
+### Changed
+
+- Amounts are `bigint` nano units everywhere, in and out.
+- Reads go to TonCenter v3 through one small client: requests are queued to
+  the allowed rate (1 a second without a key), identical ones share an answer,
+  and a 429 is retried. The API key travels in a header.
+- The constructor makes no network calls and needs no connector; reads take an
+  address. `network`, `pool`, `apiKey`, `endpoint` and `rps` replace
+  `isTestnet`, `tokenType`, `tonApiKey` and `cacheFor`.
+- `stake()` no longer needs the wallet to hold KTON already, and checks that the
+  pool takes deposits first.
+- `unstake()` resolves the jetton wallet for the connected owner at send time
+  and checks the balance first.
+- `unstakeInstant()` takes `{ maxFee }` and refuses when the pool's fee is above
+  it or the pool cannot pay at once; it asks the pool to return the KTON
+  rather than queue the withdrawal.
+- `getWithdrawals()` (was `getActiveWithdrawalNFTs`) lists only this pool's
+  payout NFTs and reads each amount from the NFT (`get_bill_amount`) instead
+  of its name.
+- `getRealizedApy()` replaces the APY estimates: the share price growth over
+  the pool's logged rounds, after the governance fee.
+- `getRoundInfo()` replaces `getRoundTimestamps()`, which reported made-up times.
+- Builds: ESM and CommonJS with `@ton/core` as a peer dependency, plus a
+  single-file browser build (`window.KTONSDK`). Node 22 or later.
+- Transaction messages are pure functions: `buildStakeMessage` and
+  `buildUnstakeMessage`.
+
+### Removed
+
+- `localStorage` caching and the override of the global `JSON` it relied on.
+- `tonapi-sdk-js`, `@ton/ton` and `@ton/crypto` as dependencies, and the
+  backup API clients.
+- Events, `switchTokenType()`, `stakeMax()`, `unstakeBestRate()`,
+  `getHoldersCount()`, `getStakersCount()`, `getAvailableBalance()`,
+  `getHistoricalApy()`, `getCurrentApy()`, `clearStorageData()`,
+  `clearStorageUserData()`, `partnerCode`.
+
+### Fixed
+
+- The pKTON testnet address was KTON's; pKTON has no testnet pool, and asking
+  for one throws.
+- Withdrawal times were estimated from wrong units; they are no longer guessed.
+
 ## [1.1.3] - 2026-09-28
 
 ### Security

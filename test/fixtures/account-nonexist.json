@@ -1,0 +1,9 @@
+{
+ "balance": "0",
+ "code": null,
+ "data": null,
+ "last_transaction_lt": "0",
+ "last_transaction_hash": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+ "frozen_hash": null,
+ "status": "uninit"
+}
