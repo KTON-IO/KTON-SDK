@@ -1,7 +1,7 @@
 {
   "name": "kton-sdk",
-  "version": "2.0.0",
-  "description": "Stake TON into the KTON liquid staking pool: pool data, balances and TonConnect messages, read from TonCenter",
+  "version": "2.0.1",
+  "description": "Stake TON into the KTON and pKTON liquid staking pools: pool data, balances and TonConnect messages, read from TonCenter",
   "type": "module",
   "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
@@ -49,6 +49,7 @@
   "license": "MIT",
   "keywords": [
     "kton",
+    "pkton",
     "ton",
     "liquid-staking",
     "staking",
