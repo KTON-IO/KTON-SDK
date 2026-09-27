@@ -1,0 +1,53 @@
+{
+ "nft_items": [
+  {
+   "address": "0:5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C5C",
+   "init": true,
+   "index": "424242",
+   "collection_address": "0:A4B50575D1043FBA451F9F39E90DF1ED1F6E0B0BD19DA1F98155466023DB97A5",
+   "owner_address": "0:5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A",
+   "content": {
+    "description": "DO NOT SEND ON CONTRACTS: Converts burned Pool Jettons to TON when ready",
+    "image": "my-custom-stake-address.ton/icon.img",
+    "name": "Bill for 1.000000000 Pool Jetton in Withdrawal Payout#663",
+    "render_type": "hidden",
+    "symbol": "⏲️",
+    "uri": "my-custom-stake-address.ton"
+   },
+   "last_transaction_lt": "104675908000562",
+   "code_hash": "ghGpwR+bboi7IVe1FqshdCFOKdgBRbGSAeRRZF2AmlA=",
+   "data_hash": "b2iA1RswJOfjHeRfSKXF2ixZiJ/3Eb2QKTJSjut6E6U=",
+   "collection": {
+    "address": "0:A4B50575D1043FBA451F9F39E90DF1ED1F6E0B0BD19DA1F98155466023DB97A5",
+    "owner_address": "0:3D1F01190FFB4E35F573EA5252D0F54A479BE2122106CA3F40B907B01905675C",
+    "last_transaction_lt": "104675908000560",
+    "next_item_index": "2",
+    "collection_content": {
+     "description": "Converts burned Pool Jettons to TON",
+     "image": "my-custom-stake-address.ton/icon.img",
+     "name": "Withdrawal Payout#663",
+     "render_type": "hidden",
+     "symbol": "⏲️",
+     "uri": "my-custom-stake-address.ton"
+    },
+    "data_hash": "N/89Q/ZP/oeAJpqyxxRS0a3Xu62+rT073DG7psnnCo4=",
+    "code_hash": "GOUOu27v7E88jalVWhQyLkmLsh0BMGgS0BY8jShxfu4="
+   },
+   "on_sale": false,
+   "real_owner": "0:5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A"
+  },
+  {
+   "address": "0:5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D5D",
+   "init": true,
+   "index": "7",
+   "collection_address": "0:5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E5E",
+   "owner_address": "0:5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A5A",
+   "content": {
+    "name": "Some other NFT"
+   },
+   "last_transaction_lt": "104675908000562",
+   "code_hash": "5vKtcNsJK9gFPGweCsjj8BVu7aIkLmvJRM4Pf9Z0mCw=",
+   "data_hash": "FZbFD1YXOSOADBVi1+7KDGGQgVNqF9wYW+1yVXHbHNk="
+  }
+ ]
+}

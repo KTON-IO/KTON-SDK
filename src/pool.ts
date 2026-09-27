@@ -1,175 +1,156 @@
-import type { TvmStackRecord } from "tonapi-sdk-js";
-import { Cell } from "@ton/core";
+import { type Address, Cell } from "@ton/core";
+import { SHARE_BASIS } from "./constants.js";
+import type { StackEntry } from "./toncenter.js";
 
-function safeGetNumber(record: TvmStackRecord | undefined): number {
-  if (record?.type !== "num") {
-    return 0;
-  }
-  return Number(record.num);
+export interface RoundLoans {
+  roundId: number;
+  /** Controllers holding a loan. */
+  activeBorrowers: number;
+  /** nanotons lent. */
+  borrowed: bigint;
+  /** nanotons expected back, with interest. */
+  expected: bigint;
+  /** nanotons returned so far. */
+  returned: bigint;
+  /** nanotons earned so far (negative on a loss). */
+  profit: bigint;
 }
 
-function safeGetBigInt(record: TvmStackRecord | undefined): bigint {
-  if (record?.type !== "num" || typeof record.num === "undefined") {
-    return 0n;
-  }
-  return BigInt(record.num);
+export interface PoolData {
+  /** 0 is normal; anything else and deposits are refused. */
+  state: number;
+  halted: boolean;
+  /** nanotons the pool holds and has lent, at the last round end. */
+  totalBalance: bigint;
+  /** Pool jettons (KTON) in circulation, in nano units. */
+  supply: bigint;
+  /** totalBalance and supply as they will be at the round end, loans repaid. */
+  projectedTotalBalance: bigint;
+  projectedSupply: bigint;
+  /** Interest the pool asks of controllers per round, as a fraction. */
+  interestRate: number;
+  /** Share of the profit the protocol keeps, as a fraction. */
+  governanceFee: number;
+  /** Deposits mint at once and withdrawals may pay at once. */
+  optimisticDepositWithdrawals: boolean;
+  depositsOpen: boolean;
+  /** Fee on an instant withdrawal, as a fraction (1 means all of it). */
+  instantWithdrawalFee: number;
+  /** Loans of the round that is validating now (empty while the pool rests). */
+  previousRound: RoundLoans;
+  /** Loans handed out for the next round. */
+  currentRound: RoundLoans;
+  /** The pool's jetton (KTON) minter. */
+  jettonMinter: Address;
+  /** nanotons deposited this round and waiting to be minted, when not optimistic. */
+  requestedForDeposit: bigint;
+  /** Pool jettons burned this round and waiting to be paid out. */
+  requestedForWithdrawal: bigint;
+  depositPayout: Address | null;
+  withdrawalPayout: Address | null;
 }
 
-export function parsePoolFullData(stack: TvmStackRecord[]) {
-  let index = 0;
-  const new_contract_version = stack.length == 34;
-  const state = safeGetNumber(stack[index++]);
-  const halted = Boolean(safeGetNumber(stack[index++]));
-  const totalBalance = safeGetBigInt(stack[index++]);
-  const interestRate = safeGetNumber(stack[index++]);
-  const optimisticDepositWithdrawals = Boolean(safeGetNumber(stack[index++]));
-  const depositsOpen = Boolean(safeGetNumber(stack[index++]));
-  let instantWithdrawalFee = 0;
-  if (new_contract_version) {
-    instantWithdrawalFee = safeGetNumber(stack[index++]);
+/** Parses `get_pool_full_data` as TonCenter v3 returns it. */
+export function parsePoolData(stack: StackEntry[]): PoolData {
+  // Older pools return 30 values: no instant withdrawal fee, no accrued
+  // governance fee, disbalance tolerance or credit start.
+  const current = stack.length === 34;
+  if (!current && stack.length !== 30) {
+    throw new Error(
+      `Unexpected get_pool_full_data: ${stack.length} values on the stack`,
+    );
   }
-  const savedValidatorSetHash = safeGetBigInt(stack[index++]);
-
-  let prvIndex = 0;
-  const prv = stack[index++]?.tuple ?? [];
-  const prvBorrowers = prv[prvIndex++]?.cell;
-  const prvRoundId = safeGetNumber(prv[prvIndex++]);
-  const prvActiveBorrowers = safeGetBigInt(prv[prvIndex++]);
-  const prvBorrowed = safeGetBigInt(prv[prvIndex++]);
-  const prvExpected = safeGetBigInt(prv[prvIndex++]);
-  const prvReturned = safeGetBigInt(prv[prvIndex++]);
-  const prvProfit = safeGetBigInt(prv[prvIndex++]);
-  const previousRound = {
-    borrowers: prvBorrowers,
-    roundId: prvRoundId,
-    activeBorrowers: prvActiveBorrowers,
-    borrowed: prvBorrowed,
-    expected: prvExpected,
-    returned: prvReturned,
-    profit: prvProfit,
+  let i = 0;
+  const next = () => {
+    const entry = stack[i++];
+    if (!entry) throw new Error("get_pool_full_data ended early");
+    return entry;
   };
 
-  let curIndex = 0;
-  const cur = stack[index++]?.tuple ?? [];
-  const curBorrowers = cur[curIndex++]?.cell ?? Cell.EMPTY;
-  const curRoundId = safeGetNumber(cur[curIndex++]);
-  const curActiveBorrowers = safeGetBigInt(cur[curIndex++]);
-  const curBorrowed = safeGetBigInt(cur[curIndex++]);
-  const curExpected = safeGetBigInt(cur[curIndex++]);
-  const curReturned = safeGetBigInt(cur[curIndex++]);
-  const curProfit = safeGetBigInt(cur[curIndex++]);
-  const currentRound = {
-    borrowers: curBorrowers.toString(),
-    roundId: curRoundId,
-    activeBorrowers: curActiveBorrowers,
-    borrowed: curBorrowed,
-    expected: curExpected,
-    returned: curReturned,
-    profit: curProfit,
-  };
-
-  const minLoan = safeGetBigInt(stack[index++]);
-  const maxLoan = safeGetBigInt(stack[index++]);
-  const governanceFee = safeGetNumber(stack[index++]);
-
-  let accruedGovernanceFee = 0n;
-  let disbalanceTolerance = 30;
-  let creditStartPriorElectionsEnd = 0;
-  if (new_contract_version) {
-    accruedGovernanceFee = safeGetBigInt(stack[index++]);
-    disbalanceTolerance = safeGetNumber(stack[index++]);
-    creditStartPriorElectionsEnd = safeGetNumber(stack[index++]);
+  const state = Number(num(next()));
+  const halted = num(next()) !== 0n;
+  const totalBalance = num(next());
+  const interestRate = Number(num(next())) / SHARE_BASIS;
+  const optimisticDepositWithdrawals = num(next()) !== 0n;
+  const depositsOpen = num(next()) !== 0n;
+  const instantWithdrawalFee = current ? Number(num(next())) / SHARE_BASIS : 0;
+  next(); // saved_validator_set_hash
+  const previousRound = round(next());
+  const currentRound = round(next());
+  next(); // min_loan_per_validator
+  next(); // max_loan_per_validator
+  const governanceFee = Number(num(next())) / SHARE_BASIS;
+  if (current) {
+    next(); // accrued_governance_fee
+    next(); // disbalance_tolerance
+    next(); // credit_start_prior_elections_end
   }
-
-  const poolJettonMinterCell = stack[index++]?.cell;
-  const poolJettonMinter = poolJettonMinterCell
-    ? Cell.fromHex(poolJettonMinterCell).beginParse().loadAddress().toString()
-    : "";
-  const poolJettonSupply = safeGetBigInt(stack[index++]);
-
-  const depositPayoutCell = stack[index++]?.cell;
-  const depositPayout = depositPayoutCell
-    ? Cell.fromHex(depositPayoutCell).beginParse().loadAddressAny()
-    : null;
-  const requestedForDeposit = safeGetBigInt(stack[index++]);
-
-  const withdrawalPayoutCell = stack[index++]?.cell;
-  const withdrawalPayout = withdrawalPayoutCell
-    ? Cell.fromHex(withdrawalPayoutCell).beginParse().loadAddressAny()
-    : null;
-  const requestedForWithdrawal = safeGetBigInt(stack[index++]);
-
-  const sudoerCell = stack[index++]?.cell;
-  const sudoer = sudoerCell
-    ? Cell.fromHex(sudoerCell).beginParse().loadAddressAny()
-    : null;
-  const sudoerSetAt = safeGetNumber(stack[index++]);
-
-  const governorCell = stack[index++]?.cell;
-  const governor = governorCell
-    ? Cell.fromHex(governorCell).beginParse().loadAddress().toString()
-    : "";
-  const governorUpdateAfter = safeGetNumber(stack[index++]);
-  const interestManagerCell = stack[index++]?.cell;
-  const interestManager = interestManagerCell
-    ? Cell.fromHex(interestManagerCell).beginParse().loadAddress().toString()
-    : "";
-  const halterCell = stack[index++]?.cell;
-  const halter = halterCell
-    ? Cell.fromHex(halterCell).beginParse().loadAddress().toString()
-    : "";
-  const approverCell = stack[index++]?.cell;
-  const approver = approverCell
-    ? Cell.fromHex(approverCell).beginParse().loadAddress().toString()
-    : "";
-
-  const controllerCode = stack[index++]?.cell;
-  const jettonWalletCode = stack[index++]?.cell;
-  const payoutMinterCode = stack[index++]?.cell;
-
-  const projectedTotalBalance = safeGetBigInt(stack[index++]);
-  const projectedPoolSupply = safeGetBigInt(stack[index++]);
+  const jettonMinter = address(next());
+  if (!jettonMinter) throw new Error("get_pool_full_data has no jetton minter");
+  const supply = num(next());
+  const depositPayout = address(next());
+  const requestedForDeposit = num(next());
+  const withdrawalPayout = address(next());
+  const requestedForWithdrawal = num(next());
+  // sudoer, sudoer_set_at, governor, governor_update_after, interest_manager,
+  // halter, approver, controller_code, pool_jetton_wallet_code,
+  // payout_minter_code
+  i += 10;
+  const projectedTotalBalance = num(next());
+  const projectedSupply = num(next());
 
   return {
     state,
     halted,
     totalBalance,
+    supply,
+    projectedTotalBalance,
+    projectedSupply,
     interestRate,
+    governanceFee,
     optimisticDepositWithdrawals,
     depositsOpen,
     instantWithdrawalFee,
-    savedValidatorSetHash,
-
     previousRound,
     currentRound,
-
-    minLoan,
-    maxLoan,
-    governanceFee,
-    accruedGovernanceFee,
-    disbalanceTolerance,
-    creditStartPriorElectionsEnd,
-
-    poolJettonMinter,
-    poolJettonSupply,
-    supply: poolJettonSupply,
-    depositPayout: depositPayout ? depositPayout.toString() : null,
+    jettonMinter,
     requestedForDeposit,
-    withdrawalPayout: withdrawalPayout ? withdrawalPayout.toString() : null,
     requestedForWithdrawal,
+    depositPayout,
+    withdrawalPayout,
+  };
+}
 
-    sudoer: sudoer ? sudoer.toString() : null,
-    sudoerSetAt,
-    governor,
-    governorUpdateAfter,
-    interestManager,
-    halter,
-    approver,
+/** A stack number. TonCenter writes them as hex, with a sign: "-0x1". */
+export function num(entry: StackEntry | undefined): bigint {
+  if (entry?.type !== "num") {
+    throw new Error(`Expected a number on the stack, got ${entry?.type}`);
+  }
+  const { value } = entry;
+  return value.startsWith("-") ? -BigInt(value.slice(1)) : BigInt(value);
+}
 
-    controllerCode,
-    jettonWalletCode,
-    payoutMinterCode,
-    projectedTotalBalance,
-    projectedPoolSupply,
+/** A cell or slice holding one address; an empty list is a null address. */
+export function address(entry: StackEntry): Address | null {
+  if (entry.type === "list" || entry.type === "tuple") return null;
+  if (entry.type !== "cell" && entry.type !== "slice") {
+    throw new Error(`Expected an address on the stack, got ${entry.type}`);
+  }
+  return Cell.fromBase64(entry.value).beginParse().loadMaybeAddress();
+}
+
+function round(entry: StackEntry): RoundLoans {
+  if (entry.type !== "tuple") {
+    throw new Error(`Expected a round tuple on the stack, got ${entry.type}`);
+  }
+  const [, roundId, activeBorrowers, borrowed, expected, returned, profit] =
+    entry.value;
+  return {
+    roundId: Number(num(roundId)),
+    activeBorrowers: Number(num(activeBorrowers)),
+    borrowed: num(borrowed),
+    expected: num(expected),
+    returned: num(returned),
+    profit: num(profit),
   };
 }
