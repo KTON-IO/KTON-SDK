@@ -23,9 +23,15 @@ jobs:
       - run: npm ci
       - name: Tag matches package.json
         run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
-      # prepublishOnly checks, tests and builds first.
+      - run: npm run typecheck && npm run check && npm run test:run && npm run build
+      # A version already published by hand is left as it is.
       - name: Publish to npm
-        run: npm publish --provenance --access public ${{ contains(github.ref_name, '-') && '--tag next' || '' }}
+        run: |
+          if npm view "kton-sdk@${GITHUB_REF_NAME#v}" version >/dev/null 2>&1; then
+            echo "kton-sdk@${GITHUB_REF_NAME#v} is already on npm"
+          else
+            npm publish --provenance --access public ${{ contains(github.ref_name, '-') && '--tag next' || '' }}
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: GitHub release
