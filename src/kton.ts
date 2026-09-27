@@ -146,7 +146,9 @@ export class KTON {
   async getRealizedApy({ days = 30 } = {}): Promise<RealizedApy | null> {
     const points: RoundPoint[] = [];
     const since = Date.now() / 1000 - days * 86_400;
-    const maxPages = Math.min(8, Math.ceil(days / 20) + 1);
+    // About 125 pool messages a month in 2026; more deposits mean more
+    // messages, and past the cap the window measured just gets shorter.
+    const maxPages = Math.min(16, Math.ceil(days / 10) + 1);
     for (let page = 0; page < maxPages; page++) {
       const { messages } = await this.api.get<{ messages: PoolMessage[] }>(
         "messages",
@@ -399,10 +401,10 @@ export class KTON {
 
   private isPayoutNft(item: NftItem): boolean {
     if (!PAYOUT_NAME.test(item.content?.name ?? "")) return false;
-    // Anyone can copy the name; the pool deploys and owns every payout collection.
-    if (!item.collection_address) return false;
+    // Anyone can copy the name, and other pools of the same contract use it
+    // too: only a collection this pool administers is its payout.
     const admin = item.collection?.owner_address;
-    return !admin || Address.parse(admin).equals(this.poolAddress);
+    return !!admin && Address.parse(admin).equals(this.poolAddress);
   }
 }
 
