@@ -1,7 +1,7 @@
 name: Release
 
 # Push a tag such as v2.0.0 (or v2.1.0-beta.1 for a prerelease) whose version
-# matches package.json.
+# matches package.json and has a "## [2.0.0]" section in CHANGELOG.md.
 on:
   push:
     tags: ["v*.*.*"]
@@ -23,6 +23,10 @@ jobs:
       - run: npm ci
       - name: Tag matches package.json
         run: test "v$(node -p 'require("./package.json").version')" = "$GITHUB_REF_NAME"
+      # The notes are the version's CHANGELOG.md section, followed by the list
+      # of merged PRs that GitHub generates. Checked before anything is published.
+      - name: Release notes
+        run: node scripts/release-notes.mjs "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
       - run: npm run typecheck && npm run check && npm run test:run && npm run build
       # A version already published by hand is left as it is.
       - name: Publish to npm
@@ -35,6 +39,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: GitHub release
-        run: gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes ${{ contains(github.ref_name, '-') && '--prerelease' || '' }} dist/kton-sdk.global.js
+        run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md" --generate-notes ${{ contains(github.ref_name, '-') && '--prerelease' || '' }} dist/kton-sdk.global.js
         env:
           GH_TOKEN: ${{ github.token }}
