@@ -79,7 +79,7 @@ off public pages by serving TonCenter through your own proxy (`endpoint`).
 | `getPoolData()` | Everything `get_pool_full_data` reports: balances, fees, round loans, deposit and withdrawal state. Cached for 15 seconds. |
 | `getTvl()` | nanotons staked in the pool |
 | `getRates()` | TON per KTON, `current` and `projected` (the round end rate, which a stake mints at) |
-| `getRealizedApy({ days })` | The yield holders actually received over about `days` days (30 by default), from the share price the pool logs every round, after the governance fee. `null` without enough rounds. |
+| `getRealizedApy({ days })` | The yield holders actually received over about `days` days (30 by default), from the share price the pool logs every round, after the governance fee. `null` without enough rounds. It reads a few pages of the pool's messages: about 3 seconds without an API key. |
 | `getRoundInfo()` | The validation round running now (`start`, `end`) and whether the pool's stake is in it (`poolValidating`); the pool lends every other round |
 | `getBalance(address?)` | nanotons in the wallet |
 | `getStakedBalance(address?)` | nano KTON in the wallet, `0n` if it has none |
@@ -96,7 +96,9 @@ user declines.
 
 - `stake(amount)` deposits `amount` nanotons. The wallet also attaches the
   pool's 1 TON deposit fee, of which about 0.997 TON comes back in the same
-  transaction. KTON is minted at the projected rate.
+  transaction. KTON is minted at once at the projected rate while the pool
+  runs optimistic deposits (`getPoolData().optimisticDepositWithdrawals`, on
+  for both pools); otherwise the pool mints at the round end.
 - `unstake(amount)` burns `amount` nano KTON. The TON arrives at the end of the
   round, at no fee; meanwhile the wallet holds a payout NFT
   (`getWithdrawals`). The wallet attaches 1 TON for the fees and gets most of
@@ -129,8 +131,8 @@ Both run the TON Foundation
 
 ## Upgrading from 1.x
 
-Version 2 is a rewrite. Upgrade from any 1.x release before 1.1.3 right away:
-their `unstake()` could withdraw instantly at the KTON pool's 100% fee (see the
+Version 2 is a rewrite. Do not use 1.1.2 or earlier: their `unstake()` could
+withdraw instantly at the KTON pool's 100% fee (see the
 [changelog](CHANGELOG.md)).
 
 - Amounts are `bigint` nano units, not `number` TON: `stake(10)` becomes

@@ -44,10 +44,14 @@ A rewrite. See "Upgrading from 1.x" in the README.
 - Events, `switchTokenType()`, `stakeMax()`, `unstakeBestRate()`,
   `getHoldersCount()`, `getStakersCount()`, `getAvailableBalance()`,
   `getHistoricalApy()`, `getCurrentApy()`, `clearStorageData()`,
-  `clearStorageUserData()`, `partnerCode`.
+  `clearStorageUserData()`.
 
 ### Fixed
 
+- Deposits no longer carry a partner code. 1.x appended `0x74746f6e` ("tton",
+  another protocol's code) to every deposit; the `partnerCode` option is gone.
+- Payout NFTs count only when their collection is administered by the pool;
+  1.x trusted the NFT name, which anyone can copy.
 - The pKTON testnet address was KTON's; pKTON has no testnet pool, and asking
   for one throws.
 - Withdrawal times were estimated from wrong units; they are no longer guessed.

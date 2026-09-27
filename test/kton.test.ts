@@ -13,7 +13,13 @@ const NEVER_USED =
 const PAYOUT_NFT =
   "0:71301C5480B32D8D8C1D736902B7F8F02B4115A75DCFB3F3AF8F183BE728DEBC";
 
-/** The chain as the fixtures captured it, for the KTON or the pKTON pool. */
+/**
+ * The chain as the fixtures captured it, for the KTON or the pKTON pool.
+ * The KTON pool had no pending withdrawal when they were captured, so the
+ * payout NFT (a 1 KTON bill from September 2026) and its get_bill_amount
+ * answer (a 0.1326 bill of another pool on the same contract) come from
+ * different captures: the amounts differ on purpose.
+ */
 function chain({
   pool = "KTON",
   billAmount = "get-bill-amount",
@@ -142,6 +148,31 @@ describe("KTON", () => {
     // One bill per payout NFT, none for the wallet's other NFTs.
     const bills = calls.filter((c) => c.body?.method === "get_bill_amount");
     expect(bills).toHaveLength(1);
+  });
+
+  it("ignores payout NFTs of other pools and of unknown collections", async () => {
+    const { fetch, calls } = chain();
+    const items = fixture<{ nft_items: Record<string, unknown>[] }>(
+      "nft-items-with-payout",
+    ).nft_items;
+    const payout = items.find((i) => i.address === PAYOUT_NFT);
+    const tonstakers =
+      "0:A45B17F28409229B78360E3290420F13E4FE20F90D7E2BF8C4AC6703259E22FA";
+    const forged = { ...payout, collection: { owner_address: tonstakers } };
+    const orphan = { ...payout, collection: { owner_address: null } };
+    const kton = new KTON({
+      rps: 1000,
+      fetch: async (input, init) => {
+        if (String(input).includes("nft/items")) {
+          return Response.json({ nft_items: [forged, orphan] });
+        }
+        return fetch(input, init);
+      },
+    });
+    expect(await kton.getWithdrawals(HOLDER)).toEqual([]);
+    expect(calls.filter((c) => c.body?.method === "get_bill_amount")).toEqual(
+      [],
+    );
   });
 
   it("leaves out a payout NFT that has already paid", async () => {
