@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-09-28
+
+### Changed
+
+- The README covers both pools: how KTON and pKTON differ in fees, exchange
+  rate and withdrawals, and what `getRates()`, `getRealizedApy()` and
+  `unstakeInstant()` return on pKTON.
+
 ## [2.0.0] - 2026-09-28
 
 A rewrite. See "Upgrading from 1.x" in the README.

@@ -39,7 +39,10 @@ export interface TonConnectLike {
 export interface KTONOptions {
   /** Defaults to mainnet. */
   network?: Network;
-  /** Defaults to KTON. pKTON exists on mainnet only. */
+  /**
+   * Defaults to KTON. pKTON exists on mainnet only; its governance fee takes
+   * all the rewards and its instant withdrawals are free. See the README.
+   */
   pool?: PoolName;
   /** Signs stakes and unstakes; reads work without it. */
   connector?: TonConnectLike;
