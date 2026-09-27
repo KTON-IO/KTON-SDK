@@ -1,8 +1,9 @@
 # KTON SDK
 
-Stake TON in the [KTON](https://kton.io) liquid staking pool from any web app.
-The SDK reads the pool and wallets from TonCenter and builds the transactions
-your users sign with TonConnect.
+Stake TON in the [KTON](https://kton.io) liquid staking pools, KTON and pKTON,
+from any web app. The SDK reads the pool and wallets from TonCenter and builds
+the transactions your users sign with TonConnect. The two pools work
+differently; see [Pools](#pools).
 
 [![npm](https://img.shields.io/npm/v/kton-sdk)](https://www.npmjs.com/package/kton-sdk)
 [![CI](https://github.com/KTON-IO/KTON-SDK/actions/workflows/ci.yml/badge.svg)](https://github.com/KTON-IO/KTON-SDK/actions/workflows/ci.yml)
@@ -74,12 +75,14 @@ off public pages by serving TonCenter through your own proxy (`endpoint`).
 
 ## Reading
 
+KTON below means the pool's token: pKTON when the SDK is set to the pKTON pool.
+
 | Method | Returns |
 | --- | --- |
 | `getPoolData()` | Everything `get_pool_full_data` reports: balances, fees, round loans, deposit and withdrawal state. Cached for 15 seconds. |
 | `getTvl()` | nanotons staked in the pool |
-| `getRates()` | TON per KTON, `current` and `projected` (the round end rate, which a stake mints at) |
-| `getRealizedApy({ days })` | The yield holders actually received over about `days` days (30 by default), from the share price the pool logs every round, after the governance fee. `null` without enough rounds. It reads a few pages of the pool's messages: about 3 seconds without an API key. |
+| `getRates()` | TON per KTON, `current` and `projected` (the round end rate, which a stake mints at). On pKTON the rate stays where it is. |
+| `getRealizedApy({ days })` | The yield holders actually received over about `days` days (30 by default), from the share price the pool logs every round, after the governance fee. `null` without enough rounds. It reads a few pages of the pool's messages: about 3 seconds without an API key. On pKTON it is about 0: the governance fee takes all the rewards. |
 | `getRoundInfo()` | The validation round running now (`start`, `end`) and whether the pool's stake is in it (`poolValidating`); the pool lends every other round |
 | `getBalance(address?)` | nanotons in the wallet |
 | `getStakedBalance(address?)` | nano KTON in the wallet, `0n` if it has none |
@@ -107,7 +110,8 @@ user declines.
   charges its instant withdrawal fee for it, and the SDK refuses when that fee
   is above `maxFee` (a fraction, `0` by default) or when the pool does not
   hold enough TON. **The KTON pool's instant withdrawal fee is 100%**, so on
-  KTON this always refuses; use `unstake`.
+  KTON this always refuses; use `unstake`. The pKTON pool's fee is 0, so there
+  it pays at once whenever `getInstantLiquidity()` covers the amount.
 
 For your own transaction flow, build the messages yourself:
 
@@ -120,14 +124,27 @@ await tonConnect.sendTransaction({ validUntil: Math.floor(Date.now() / 1000) + 3
 
 ## Pools
 
-| Pool | Network | Address |
-| --- | --- | --- |
-| KTON | mainnet | `EQA9HwEZD_tONfVz6lJS0PVKR5viEiEGyj9AuQewGQVnXPg0` |
-| KTON | testnet | `kQD2y9eUotYw7VprrD0UJvAigDVXwgCCLWAl-DjaamCHniVr` |
-| pKTON | mainnet | `EQDsW2P6nuP1zopKoNiCYj2xhqDan0cBuULQ8MH4o7dBt_7a` |
+Both pools run the TON Foundation
+[liquid staking contract](https://github.com/ton-blockchain/liquid-staking-contract)
+with different settings. Pick one with the `pool` option; one `KTON` instance
+serves one pool.
 
-Both run the TON Foundation
-[liquid staking contract](https://github.com/ton-blockchain/liquid-staking-contract).
+| | KTON | pKTON |
+| --- | --- | --- |
+| Governance fee | 16%: holders get 84% of the staking rewards | 100%: all rewards go to the pool's treasury |
+| Exchange rate | Rises as the pool earns | Stays where the first deposit set it |
+| Withdraw at the round end (`unstake`) | Free | Free |
+| Withdraw at once (`unstakeInstant`) | Refused: the fee is 100% | Free, when the pool holds the TON |
+| Mainnet | `EQA9HwEZD_tONfVz6lJS0PVKR5viEiEGyj9AuQewGQVnXPg0` | `EQDsW2P6nuP1zopKoNiCYj2xhqDan0cBuULQ8MH4o7dBt_7a` |
+| Testnet | `kQD2y9eUotYw7VprrD0UJvAigDVXwgCCLWAl-DjaamCHniVr` | None |
+
+KTON is the yield token: its price in TON rises as the pool earns. pKTON
+earns nothing on chain; it holds TON at a fixed rate that can be withdrawn
+at once. The operator distributes the pKTON treasury's rewards outside the
+contract, under separate agreements.
+
+The fees are pool settings, not constants: `getPoolData()` reports the current
+`governanceFee` and `instantWithdrawalFee`.
 
 ## Upgrading from 1.x
 
