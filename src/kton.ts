@@ -836,7 +836,11 @@ class KTON extends EventTarget {
     if (!KTON.jettonWalletAddress)
       throw new Error("Jetton wallet address is not set.");
     await this.validateAmount(amount);
-    const payload = this.preparePayload("unstake", amount);
+    // Always wait for the round to end. With the wait bit clear the pool pays
+    // out at once whenever it holds enough TON and charges its instant
+    // withdrawal fee, which the KTON pool sets to 100%: the KTON is burned
+    // and almost nothing comes back.
+    const payload = this.preparePayload("unstake", amount, true);
     const result = await this.sendTransaction(
       KTON.jettonWalletAddress,
       toNano(CONTRACT.UNSTAKE_FEE_RES),
@@ -850,6 +854,18 @@ class KTON extends EventTarget {
     if (!KTON.jettonWalletAddress)
       throw new Error("Jetton wallet address is not set.");
     await this.validateAmount(amount);
+    // An instant withdrawal is charged the pool's instant withdrawal fee.
+    // Refuse to send one unless that fee is zero: on the KTON pool it is
+    // 100%, which would take the whole amount.
+    const pool = await this.fetchStakingPoolInfo(0);
+    if (pool.instantWithdrawalFee !== 0) {
+      throw new Error(
+        `Instant unstaking is disabled: this pool charges ${(
+          (pool.instantWithdrawalFee / 2 ** 24) *
+          100
+        ).toFixed(2)}% for it. Use unstake() to wait for the round end.`
+      );
+    }
     const payload = this.preparePayload("unstake", amount, false, true);
     const result = await this.sendTransaction(
       KTON.jettonWalletAddress,
@@ -1043,7 +1059,8 @@ class KTON extends EventTarget {
     amount: bigint,
     payload: string
   ): Promise<SendTransactionResponse> {
-    const validUntil = +new Date() + TIMING.TIMEOUT;
+    // TonConnect wants unix seconds, not milliseconds.
+    const validUntil = Math.floor((Date.now() + TIMING.TIMEOUT) / 1000);
     const transaction: TransactionDetails = {
       validUntil,
       messages: [
