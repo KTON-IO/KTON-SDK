@@ -1,0 +1,10 @@
+{
+ "gas_used": 3128,
+ "exit_code": 0,
+ "stack": [
+  {
+   "type": "cell",
+   "value": "te6cckEBAQEAJAAAQ4ABVqRmmcmDsiy5nvoxdp1osPuJ9+5bzG/LtBJB1aRW8DD/7LG8"
+  }
+ ]
+}
