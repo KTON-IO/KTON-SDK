@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3] - 2026-09-28
+
+### Security
+
+- `unstake()` now always asks the pool to wait for the round end. It used to
+  leave that bit clear, so whenever the pool held enough TON it paid out at
+  once and charged its instant withdrawal fee. The KTON pool sets that fee to
+  100%: the KTON was burned and almost nothing came back. Upgrade before
+  unstaking.
+- `unstakeInstant()` refuses to send unless the pool's instant withdrawal fee
+  is zero.
+- Transactions carry `validUntil` in unix seconds as TonConnect expects (it
+  was milliseconds).
+
 ## [1.1.2] - 2025-09-08
 
 ### 🔧 Maintenance Release
