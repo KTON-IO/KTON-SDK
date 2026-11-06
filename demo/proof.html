@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex">
   <title>Wallet proof test</title>
   <link rel="icon" href="icon.png">
-  <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@3.0.2/dist/tonconnect-ui.min.js" integrity="sha384-BTareOTsWX/2zcVxklvKhoTWnYXs1NbbMON7wL80t6xeld55HGlSS/oBJmrEvNG9" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tonconnect/ui@5.0.1/dist/tonconnect-ui.min.js" integrity="sha384-QZvMrS6g6/TQyHjoc44P3RG1Kzfqnwen5A/EZ0LaQZKP8hvNY2stUmyFB5QDIKmp" crossorigin="anonymous"></script>
   <style>
     :root {
       --bg: #f5f7fa; --card: #ffffff; --text: #16202c; --muted: #5b6b7d;
@@ -200,8 +200,13 @@
   const payload = hex(crypto.getRandomValues(new Uint8Array(16)));
   result.proofPayload = payload;
 
+  // The SDK reports usage to analytics.ton.org unless told not to, and
+  // TonConnectUI only passes that on through a connector of its own.
   const tonConnect = new TON_CONNECT_UI.TonConnectUI({
-    manifestUrl: new URL("tonconnect-manifest.json", location.href).href,
+    connector: new TON_CONNECT_UI.TonConnect({
+      manifestUrl: new URL("tonconnect-manifest.json", location.href).href,
+      analytics: { mode: "off" },
+    }),
     buttonRootId: "connect",
   });
   tonConnect.setConnectRequestParameters({ state: "ready", value: { tonProof: payload } });
