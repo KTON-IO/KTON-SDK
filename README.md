@@ -203,7 +203,9 @@ npm run typecheck
 npm run build     # dist/esm, dist/cjs and dist/kton-sdk.global.js
 ```
 
-Tests replay real TonCenter responses kept in `test/fixtures`. To release, bump
+Tests replay real TonCenter responses kept in `test/fixtures`; in those
+about a wallet, the wallet's addresses and hashes are replaced with made-up
+ones. To release, bump
 `version` in `package.json`, add the changes to `CHANGELOG.md`, and push a tag
 such as `v2.0.1`: the release workflow tests, stages the version on npm with
 provenance, and creates the GitHub release. The version goes live on npm once a
