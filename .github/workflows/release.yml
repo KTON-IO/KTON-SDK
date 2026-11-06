@@ -2,6 +2,10 @@ name: Release
 
 # Push a tag such as v2.0.0 (or v2.1.0-beta.1 for a prerelease) whose version
 # matches package.json and has a "## [2.0.0]" section in CHANGELOG.md.
+#
+# npm trusts this workflow (trusted publishing, no token) to stage a version
+# only: it goes live once a maintainer approves it under Staged Packages on
+# npmjs.com, or with `npm stage approve <id>`, either way with 2FA.
 on:
   push:
     tags: ["v*.*.*"]
@@ -28,16 +32,17 @@ jobs:
       - name: Release notes
         run: node scripts/release-notes.mjs "$GITHUB_REF_NAME" > "$RUNNER_TEMP/notes.md"
       - run: npm run typecheck && npm run check && npm run test:run && npm run build
+      # Staged publishing needs npm 11.15.0 or later.
+      - name: npm version
+        run: node -e 'const [a, b] = process.argv[1].split(".").map(Number); if (a < 11 || (a === 11 && b < 15)) { console.error(`npm ${process.argv[1]} cannot stage`); process.exit(1) }' "$(npm --version)"
       # A version already published by hand is left as it is.
-      - name: Publish to npm
+      - name: Stage on npm
         run: |
           if npm view "kton-sdk@${GITHUB_REF_NAME#v}" version >/dev/null 2>&1; then
             echo "kton-sdk@${GITHUB_REF_NAME#v} is already on npm"
           else
-            npm publish --provenance --access public ${{ contains(github.ref_name, '-') && '--tag next' || '' }}
+            npm stage publish --provenance --access public ${{ contains(github.ref_name, '-') && '--tag next' || '' }}
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: GitHub release
         run: gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/notes.md" --generate-notes ${{ contains(github.ref_name, '-') && '--prerelease' || '' }} dist/kton-sdk.global.js
         env:
