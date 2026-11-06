@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-11-06
+
+### Added
+
+- `getPoolDataRaw()`: the pool's stored data (`get_pool_full_data_raw`),
+  without the rotation `getPoolData()` works out once the validator set has
+  changed.
+- `getLastRotation()`: the pool's last rotation from its round log, to
+  tell a stalled pool (no rotation for over a cycle) from a working one.
+- `getSchedule()`: the next payout, the first payout a new stake earns, the
+  next rotation, and when a withdrawal asked for now is paid, with the same
+  reckoning as the KTON app and bot.
+- `checkWithdrawal(amount, mode)` and the pure `checkWithdrawal(pool, poolBalance, amount, mode)`:
+  whether the pool would take a burn, as the contract decides it (an instant
+  payout needs the free balance to exceed the KTON's worth; every withdrawal
+  needs the next round end's funds to cover the whole queue), with the value,
+  the fee, what the owner receives, and the most it would take right now.
+
+### Changed
+
+- `checkWithdrawal` predicts nothing while a rotation is pending (the
+  validator set has changed but the pool has not rotated yet): the pool's
+  balance does not show yet what that rotation pays out.
+- `unstake()` refuses a burn the pool would mint back because the queue would
+  be larger than it can pay at the round end.
+- `unstakeInstant()` uses the same check, so it also refuses a payout that
+  would leave the queue uncovered.
+- `unstake()` and `unstakeInstant()` read the pool's data, its stored data
+  and its balance before asking the wallet, so they can throw before the
+  wallet opens; their error messages now name the reason.
+- The README no longer says the KTON pool's instant fee is 100%: the pool
+  set it to 0.2% on 2026-10-17. Pass `maxFee` to agree to it.
+
 ## [2.0.1] - 2026-09-28
 
 ### Changed
