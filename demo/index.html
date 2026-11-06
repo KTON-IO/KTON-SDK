@@ -90,6 +90,10 @@
   const { KTON, toNano, fromNano } = KTONSDK;
   const $ = (id) => document.getElementById(id);
   const ton = (nano) => Number(fromNano(nano)).toLocaleString("en-US", { maximumFractionDigits: 4 });
+  // In English like the rest of the page, in the visitor's own time zone, named.
+  const when = (date) => date.toLocaleString("en-US", {
+    year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short",
+  });
 
   // The SDK reports usage to analytics.ton.org unless told not to, and
   // TonConnectUI only passes that on through a connector of its own.
@@ -131,8 +135,8 @@
         ["Realized APY", "Measuring"],
         ["Governance fee", `${(pool.governanceFee * 100).toFixed(2)}%`],
         ["Instant fee", `${(pool.instantWithdrawalFee * 100).toFixed(2)}%, about ${ton(liquidity)} Gram free`],
-        ["Next payout", schedule.nextPayout.toLocaleString()],
-        ["Next rotation", schedule.nextRotation.toLocaleString()],
+        ["Next payout", when(schedule.nextPayout)],
+        ["Next rotation", when(schedule.nextRotation)],
         ["Deposits", pool.depositsOpen && !pool.halted ? "Open" : "Closed"],
       ];
       rows($("pool-data"), entries);
@@ -194,7 +198,7 @@
         rows($("quote"), [
           ["You receive", `about ${ton(check.receive)} Gram`],
           ["Fee", `${ton(check.fee)} Gram`],
-          ["Arrives", action === "instant" ? "Now" : schedule.unstakeArrival.toLocaleString()],
+          ["Arrives", action === "instant" ? "Now" : when(schedule.unstakeArrival)],
           ["Most the pool takes now", `${ton(check.limit)} ${kton.pool}`],
         ]);
         if (!check.accepted) return status(`The pool would return this (${check.reason}).`, true);
