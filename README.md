@@ -83,12 +83,15 @@ KTON below means the pool's token: pKTON when the SDK is set to the pKTON pool.
 | `getTvl()` | nanotons staked in the pool |
 | `getRates()` | TON per KTON, `current` and `projected` (the round end rate, which a stake mints at). On pKTON the rate stays where it is. |
 | `getRealizedApy({ days })` | The yield holders actually received over about `days` days (30 by default), from the share price the pool logs every round, after the governance fee. `null` without enough rounds. It reads a few pages of the pool's messages: about 3 seconds without an API key. On pKTON it is about 0: the governance fee takes all the rewards. |
+| `getLastRotation()` | The pool's last rotation (`roundId`, `time`, balance and supply after it) from its round log; one more than a cycle old means the pool has stalled and waiting withdrawals wait for it |
+| `getSchedule()` | When the pool pays, as the KTON app reckons it (mainnet; the testnet pool does not lend, so its times mean nothing): `nextPayout` (the rate's next step), `firstPayoutForNewStake`, `nextRotation` (queued withdrawals are paid at every rotation, about 9 and 27 hours apart) and `unstakeArrival` (a withdrawal asked for now; a rotation under an hour away is not promised) |
 | `getRoundInfo()` | The validation round running now (`start`, `end`) and whether the pool's stake is in it (`poolValidating`); the pool lends every other round |
 | `getBalance(address?)` | nanotons in the wallet |
 | `getStakedBalance(address?)` | nano KTON in the wallet, `0n` if it has none |
 | `getJettonWallet(address?)` | The wallet's KTON jetton wallet address |
 | `getWithdrawals(address?)` | Withdrawals waiting for the round end: `{ nft, amount }` for each payout NFT the wallet holds |
-| `getInstantLiquidity()` | nanotons the pool could pay out at once |
+| `getInstantLiquidity()` | nanotons the pool holds free (its balance less the 10 TON it keeps). What it would actually pay at once also depends on its queue: see `checkWithdrawal(...).limit` |
+| `checkWithdrawal(amount, mode)` | Whether the pool would take a burn of `amount` nano KTON, `"wait"` or `"instant"`: `accepted`, the `reason` if not (`halted`, `rotation-pending`, `not-optimistic`, `too-small`, `no-liquidity`, `queue-too-large`), `value`, `fee`, `receive`, and `limit`, the most it would take right now (an instant limit keeps 1 TON in hand). A burn the pool refuses is minted back, so check before sending. |
 
 `address` defaults to the connected wallet.
 
@@ -105,13 +108,16 @@ user declines.
 - `unstake(amount)` burns `amount` nano KTON. The TON arrives at the end of the
   round, at no fee; meanwhile the wallet holds a payout NFT
   (`getWithdrawals`). The wallet attaches 1 TON for the fees and gets most of
-  it back.
+  it back. The pool only queues what it can pay at the next round end, so a
+  large withdrawal while its previous round has no loans out is minted back;
+  `unstake` checks this first (`checkWithdrawal`) and refuses.
 - `unstakeInstant(amount, { maxFee })` asks the pool to pay at once. The pool
-  charges its instant withdrawal fee for it, and the SDK refuses when that fee
-  is above `maxFee` (a fraction, `0` by default) or when the pool does not
-  hold enough TON. **The KTON pool's instant withdrawal fee is 100%**, so on
-  KTON this always refuses; use `unstake`. The pKTON pool's fee is 0, so there
-  it pays at once whenever `getInstantLiquidity()` covers the amount.
+  charges its instant withdrawal fee for it (`getPoolData().instantWithdrawalFee`;
+  the KTON pool's was 0.2% on 2026-11-06), and the SDK refuses when that fee
+  is above `maxFee` (a fraction, `0` by default, so pass it to agree:
+  `{ maxFee: 0.002 }`) or when the pool cannot pay it now (`checkWithdrawal`).
+  If the pool still cannot pay when the burn arrives, it mints the KTON back
+  instead of queueing it.
 
 For your own transaction flow, build the messages yourself:
 
@@ -134,13 +140,13 @@ serves one pool.
 | Governance fee | 16%: holders get 84% of the staking rewards | 100%: all rewards go to the pool's treasury |
 | Exchange rate | Rises as the pool earns | Stays where the first deposit set it |
 | Withdraw at the round end (`unstake`) | Free | Free |
-| Withdraw at once (`unstakeInstant`) | Refused: the fee is 100% | Free, when the pool holds the TON |
+| Withdraw at once (`unstakeInstant`) | At the pool's instant fee (0.2% on 2026-11-06), when the pool holds the TON | Free, when the pool holds the TON |
 | Mainnet | `EQA9HwEZD_tONfVz6lJS0PVKR5viEiEGyj9AuQewGQVnXPg0` | `EQDsW2P6nuP1zopKoNiCYj2xhqDan0cBuULQ8MH4o7dBt_7a` |
 | Testnet | `kQD2y9eUotYw7VprrD0UJvAigDVXwgCCLWAl-DjaamCHniVr` | None |
 
 KTON is the yield token: its price in TON rises as the pool earns. pKTON
-earns nothing on chain; it holds TON at a fixed rate that can be withdrawn
-at once. The operator distributes the pKTON treasury's rewards outside the
+serves vesting contracts. It earns nothing on chain: it holds TON at a fixed
+rate that can be withdrawn at once. The operator distributes the pKTON treasury's rewards outside the
 contract, under separate agreements.
 
 The fees are pool settings, not constants: `getPoolData()` reports the current
@@ -149,8 +155,8 @@ The fees are pool settings, not constants: `getPoolData()` reports the current
 ## Upgrading from 1.x
 
 Version 2 is a rewrite. Do not use 1.1.2 or earlier: their `unstake()` could
-withdraw instantly at the KTON pool's 100% fee (see the
-[changelog](CHANGELOG.md)).
+withdraw instantly at the KTON pool's instant fee, which was 100% at the time (see the
+[changelog](https://github.com/KTON-IO/KTON-SDK/blob/main/CHANGELOG.md)).
 
 - Amounts are `bigint` nano units, not `number` TON: `stake(10)` becomes
   `stake(toNano("10"))`, and balances come back as `bigint`.

@@ -20,7 +20,20 @@ import {
   type TonConnectMessage,
 } from "./messages.js";
 import { address, num, type PoolData, parsePoolData } from "./pool.js";
+import {
+  payoutBases,
+  payoutSchedule,
+  roundInfoFromCycle,
+  selectActiveCycle,
+  UNSTAKE_MARGIN_HOURS,
+  VALIDATION_ROUND_BEGIN_REFERENCE_UTIMES,
+} from "./schedule.js";
 import { TonCenter } from "./toncenter.js";
+import {
+  checkWithdrawal,
+  type WithdrawalCheck,
+  type WithdrawalMode,
+} from "./withdrawal.js";
 
 /**
  * What the SDK needs of a TonConnect instance. `TonConnectUI` from
@@ -68,6 +81,13 @@ export interface RoundInfo {
   end: Date;
   /** The pool lends every other round: whether its stake is in this one. */
   poolValidating: boolean;
+}
+
+export interface Schedule {
+  nextPayout: Date;
+  firstPayoutForNewStake: Date;
+  nextRotation: Date;
+  unstakeArrival: Date;
 }
 
 export interface Withdrawal {
@@ -128,6 +148,22 @@ export class KTON {
     return parsePoolData(result.stack);
   }
 
+  /**
+   * The pool's data as it is stored, without the rotation `getPoolData` works
+   * out when the validator set has changed (`get_pool_full_data_raw`). The two
+   * differ only while a rotation is waiting for its first message.
+   */
+  async getPoolDataRaw(): Promise<PoolData> {
+    const result = await this.api.runGetMethod(
+      this.poolAddress.toRawString(),
+      "get_pool_full_data_raw",
+      [],
+      POOL_TTL_MS,
+    );
+    assertExit(result.exit_code, "get_pool_full_data_raw");
+    return parsePoolData(result.stack);
+  }
+
   /** nanotons staked in the pool. */
   async getTvl(): Promise<bigint> {
     return (await this.getPoolData()).totalBalance;
@@ -176,6 +212,36 @@ export class KTON {
     return realizedApy(points, days);
   }
 
+  /**
+   * The pool's last rotation as it logged it (round id, unix time, balance
+   * and supply after it), from its newest round-completion log; null when
+   * none is among its last few hundred messages. A rotation more than a
+   * cycle (about 36 hours) old means the pool has stalled: queued
+   * withdrawals and payouts wait until it rotates again.
+   */
+  async getLastRotation(): Promise<RoundPoint | null> {
+    for (let page = 0; page < 4; page++) {
+      const { messages } = await this.api.get<{ messages: PoolMessage[] }>(
+        "messages",
+        {
+          source: this.poolAddress.toRawString(),
+          sort: "desc",
+          limit: MESSAGES_PAGE,
+          offset: page * MESSAGES_PAGE,
+        },
+        CYCLES_TTL_MS,
+      );
+      for (const message of messages) {
+        const body = message.message_content?.body;
+        if (message.destination !== null || !body) continue;
+        const point = parseRoundLog(body, Number(message.created_at));
+        if (point) return point;
+      }
+      if (messages.length < MESSAGES_PAGE) break;
+    }
+    return null;
+  }
+
   async getRoundInfo(): Promise<RoundInfo> {
     const [{ cycles }, pool] = await Promise.all([
       this.api.get<{ cycles: ValidatorCycle[] }>(
@@ -196,6 +262,37 @@ export class KTON {
       start: new Date(cycle.cycle_start * 1000),
       end: new Date(cycle.cycle_end * 1000),
       poolValidating: pool.previousRound.borrowed > 0n,
+    };
+  }
+
+  /**
+   * When the pool pays, from the validation cycle (the same reckoning as the
+   * KTON app and bot): `nextPayout` when the rate next steps up,
+   * `firstPayoutForNewStake` the first payout a stake made now earns,
+   * `nextRotation` the next time queued withdrawals are paid, and
+   * `unstakeArrival` when a withdrawal asked for now is paid.
+   */
+  async getSchedule(now = Date.now()): Promise<Schedule> {
+    const { cycles } = await this.api.get<{ cycles: ValidatorCycle[] }>(
+      "validators/cycles",
+      { limit: 2 },
+      CYCLES_TTL_MS,
+    );
+    const cycle = selectActiveCycle(cycles, now / 1000);
+    if (!cycle) throw new Error("TonCenter listed no validation round");
+    const bases = payoutBases(
+      roundInfoFromCycle(
+        cycle,
+        VALIDATION_ROUND_BEGIN_REFERENCE_UTIMES[this.network],
+      ),
+    );
+    if (!bases) throw new Error("The validation round has no times");
+    const at = payoutSchedule(bases, now, UNSTAKE_MARGIN_HOURS);
+    return {
+      nextPayout: new Date(at.nextPayoutMs),
+      firstPayoutForNewStake: new Date(at.firstPayoutForNewStakeMs),
+      nextRotation: new Date(at.nextRotationMs),
+      unstakeArrival: new Date(at.unstakeArrivalMs),
     };
   }
 
@@ -279,13 +376,39 @@ export class KTON {
    * The pool pays an instant withdrawal only when it is worth less than this.
    */
   async getInstantLiquidity(): Promise<bigint> {
+    const free = (await this.getPoolBalance()) - MIN_TONS_FOR_STORAGE;
+    return free > 0n ? free : 0n;
+  }
+
+  /**
+   * What the pool would do with a burn of `amount` nano KTON in this mode:
+   * whether it takes it (a burn it refuses is minted back), what the owner
+   * receives and the fee, and the most it would take right now. See
+   * `checkWithdrawal`.
+   */
+  async checkWithdrawal(
+    amount: bigint,
+    mode: WithdrawalMode,
+  ): Promise<WithdrawalCheck> {
+    assertPositive(amount);
+    const [pool, stored, balance] = await Promise.all([
+      this.getPoolData(),
+      this.getPoolDataRaw(),
+      this.getPoolBalance(),
+    ]);
+    return checkWithdrawal(pool, balance, amount, mode, {
+      rotationPending:
+        pool.previousRound.roundId !== stored.previousRound.roundId,
+    });
+  }
+
+  private async getPoolBalance(): Promise<bigint> {
     const account = await this.api.get<{ balance: string }>(
       "account",
       { address: this.poolAddress.toRawString() },
       POOL_TTL_MS,
     );
-    const free = BigInt(account.balance) - MIN_TONS_FOR_STORAGE;
-    return free > 0n ? free : 0n;
+    return BigInt(account.balance);
   }
 
   // Transactions
@@ -314,9 +437,13 @@ export class KTON {
 
   /**
    * Burns `amount` nano KTON for TON paid at the end of the round, at no fee.
-   * The wallet receives a payout NFT meanwhile (see getWithdrawals).
+   * The wallet receives a payout NFT meanwhile (see getWithdrawals). Refuses
+   * a burn the pool would mint back because the queue at the round end would
+   * be larger than it can pay (checkWithdrawal).
    */
-  unstake(amount: bigint): Promise<SentTransaction> {
+  async unstake(amount: bigint): Promise<SentTransaction> {
+    const check = await this.checkWithdrawal(amount, "wait");
+    if (!check.accepted) throw new Error(refusal(check));
     return this.burn(amount, "wait");
   }
 
@@ -340,12 +467,8 @@ export class KTON {
         `An instant withdrawal costs ${(pool.instantWithdrawalFee * 100).toFixed(2)}% here, above maxFee; use unstake() to wait for the round end at no fee`,
       );
     }
-    const value = (amount * pool.totalBalance) / pool.supply;
-    if (value >= (await this.getInstantLiquidity())) {
-      throw new Error(
-        "The pool cannot pay this much at once; use unstake() to wait for the round end",
-      );
-    }
+    const check = await this.checkWithdrawal(amount, "instant");
+    if (!check.accepted) throw new Error(refusal(check));
     return this.burn(amount, "instant");
   }
 
@@ -420,6 +543,8 @@ interface PoolMessage {
 interface ValidatorCycle {
   cycle_start: number;
   cycle_end: number;
+  validators_elected_for: number;
+  stake_held_for: number;
 }
 
 interface NftItem {
@@ -427,6 +552,26 @@ interface NftItem {
   collection_address: string | null;
   content?: { name?: string } | null;
   collection?: { owner_address?: string | null } | null;
+}
+
+/** Why the pool would return a burn, as an error message. */
+function refusal(check: WithdrawalCheck): string {
+  switch (check.reason) {
+    case "halted":
+      return "The pool is halted";
+    case "rotation-pending":
+      return "The pool is about to rotate; try again in a few minutes";
+    case "not-optimistic":
+      return "The pool does not pay withdrawals instantly";
+    case "too-small":
+      return "The amount is too small to pay";
+    case "no-liquidity":
+      return `The pool cannot pay this much at once (at most ${check.limit} nano KTON right now); use unstake() to wait for the round end`;
+    default:
+      return check.mode === "instant"
+        ? `The pool cannot pay this at once without leaving its queue uncovered (at most ${check.limit} nano KTON right now)`
+        : `The pool would return this burn: it can queue at most ${check.limit} nano KTON right now`;
+  }
 }
 
 function ratio(balance: bigint, supply: bigint): number {

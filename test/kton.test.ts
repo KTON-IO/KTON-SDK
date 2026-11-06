@@ -34,7 +34,11 @@ function chain({
     const path = url.pathname.replace("/api/v3/", "");
     const query = url.searchParams;
     if (path === "runGetMethod" && body) {
-      if (body.method === "get_pool_full_data") {
+      // The stored data equals the worked-out data: no rotation pending.
+      if (
+        body.method === "get_pool_full_data" ||
+        body.method === "get_pool_full_data_raw"
+      ) {
         return fixture(`${prefix}pool-full-data`);
       }
       if (body.method === "get_wallet_address") {
