@@ -45,9 +45,9 @@ describe("checkWithdrawal", () => {
     ).toBe(false);
   });
 
-  // 2026-01-14 03:10Z: the previous round empty, 2,908.457 TON in the pool,
-  // NAV about 1. Five queued burns of 23,482 KTON came back; 2,000 + 800 went
-  // through (kton-expert CONTRACTS §5.7).
+  // A pool between loans: the previous round empty, 2,908.457 TON in the
+  // pool, 1 KTON worth about 1 TON. A queued burn far above what it can cover
+  // comes back; smaller ones go through.
   const resting: PoolData = {
     ...now,
     totalBalance: 1_231_432_642_000_000n,
@@ -59,7 +59,7 @@ describe("checkWithdrawal", () => {
   };
   const thin = 2_908_457_000_000n;
 
-  it("refuses the queued burn the pool returned on 2026-01-14, and takes what went through", () => {
+  it("refuses a queued burn the pool between loans cannot cover, and takes a smaller one", () => {
     const big = checkWithdrawal(resting, thin, 23_482n * KTON, "wait");
     expect(big.accepted).toBe(false);
     expect(big.reason).toBe("queue-too-large");
