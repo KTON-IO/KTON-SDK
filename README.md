@@ -1,7 +1,7 @@
 # KTON SDK
 
-Stake TON in the [KTON](https://kton.io) liquid staking pools, KTON and pKTON,
-from any web app. The SDK reads the pool and wallets from TonCenter and builds
+Stake Gram (TON) in the [KTON](https://kton.io) liquid staking pools, KTON and
+pKTON, from any web app. The SDK reads the pool and wallets from TonCenter and builds
 the transactions your users sign with TonConnect. The two pools work
 differently; see [Pools](#pools).
 
@@ -37,8 +37,9 @@ const tonConnect = new TonConnectUI({ manifestUrl: "https://example.com/tonconne
 const kton = new KTON({ connector: tonConnect });
 
 // Pool
-const rates = await kton.getRates(); // { current: 1.0722, projected: 1.0728 } TON per KTON
+const rates = await kton.getRates(); // { current: 1.0722, projected: 1.0728 } Gram per KTON
 const apy = await kton.getRealizedApy(); // { apy: 0.1342, days: 28.8, ... }
+const { nextPayout, unstakeArrival } = await kton.getSchedule(); // Dates
 
 // The connected wallet
 const staked = await kton.getStakedBalance(); // nano KTON
@@ -46,10 +47,25 @@ console.log(`${fromNano(staked)} KTON`);
 
 // Transactions, signed in the user's wallet
 await kton.stake(toNano("10"));
-await kton.unstake(toNano("5"));
+
+// Unstake: check first what the pool would take, then wait for the round
+// end at no fee, or be paid now at the pool's instant fee
+const amount = toNano("5");
+const check = await kton.checkWithdrawal(amount, "instant");
+if (check.accepted) {
+  console.log(`${fromNano(check.receive)} Gram now, ${fromNano(check.fee)} fee`);
+  await kton.unstakeInstant(amount, { maxFee: 0.002 });
+} else {
+  console.log(check.reason, `at most ${fromNano(check.limit)} KTON now`);
+  await kton.unstake(amount); // arrives at unstakeArrival
+}
 ```
 
-Amounts are always `bigint` in nano units (1 TON = 10^9). Use `toNano` and
+Gram is the coin of the TON network, formerly called Toncoin. This README
+says Gram, and also TON where it means the coin; the API keeps the TON names
+(`toNano`, nanotons).
+
+Amounts are always `bigint` in nano units (1 Gram = 10^9). Use `toNano` and
 `fromNano`, exported from the SDK, to convert.
 
 ## Options
