@@ -19,6 +19,7 @@ export {
   type KTONOptions,
   type Rates,
   type RoundInfo,
+  type Schedule,
   type SentTransaction,
   type TonConnectLike,
   type Withdrawal,
@@ -36,3 +37,9 @@ export {
   TonCenterError,
   type TonCenterOptions,
 } from "./toncenter.js";
+export {
+  checkWithdrawal,
+  type WithdrawalCheck,
+  type WithdrawalCheckOptions,
+  type WithdrawalMode,
+} from "./withdrawal.js";

@@ -1,6 +1,6 @@
 {
   "name": "kton-sdk",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Stake TON into the KTON and pKTON liquid staking pools: pool data, balances and TonConnect messages, read from TonCenter",
   "type": "module",
   "main": "./dist/cjs/index.cjs",
